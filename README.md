@@ -1,6 +1,6 @@
 # 헬스장 로봇 GUI
 
-7인치 원형 디스플레이(1080×1080, LCD AA 177.55mm)용 인터랙티브 화면.
+지름 10cm 원형 디스플레이(1080×1080)용 인터랙티브 화면.
 파일 하나(`index.html`)로 끝나고, 빌드도 의존성도 없다.
 
 - 배포 : https://dab2n.github.io/baton-gym/
@@ -27,17 +27,23 @@
 | 2 | fill | `Hello, shall we start your workout?` | 엄지척 |
 | 3 | search | 베젤 안쪽이 숨쉬듯 일렁임 (컨텍스트 수신) | 4.2s |
 | 4 | full | 기기 칩 등장 → `Welcome back, Somi.` | 4.3s |
-| 5 | full | `Today's context` · 어깨/상체 | 6.0s |
-| 6 | full | `Analyzing your workout context…` | 4.6s |
-| 7 | full | `Shoulder-friendly mode recommended.` · Level 03 | 6.4s |
-| 8 | full | `Adjusting resistance.` · Level 03 → 02 | 6.0s |
-| 9 | full | `You're all set.` | 6.0s |
-| 10 | full | `Ready? Let's begin your workout.` · 10 REPS | 5.2s |
-| 11–14 | full | 카운트 `3/10` `4/10` `5/10` `10/10` + 코칭 | 4.2~5.6s |
-| 15 | full | `Workout complete.` · 30 REPS · 3 SETS | 5.2s |
-| 16 | full | `Today's workout` 요약 | 6.4s |
-| 17 | full | `Workout context saved.` | 6.8s |
+| 5 | full | `Today's context` · 어깨/상체 | 5.6s |
+| 6 | full | `Analyzing…` | 3.8s |
+| 7 | full | `Shoulder-friendly mode` · Level 03 · Light | 5.6s |
+| 8 | full | `Adjusting for you.` · Level 03 → 02 | 5.0s |
+| 9 | full | `You're all set.` | 4.2s |
+| 10 | full | `Ready?` · 10 REPS | 4.6s |
+| 11–14 | full | 카운트 `3/10` `4/10` `5/10` `10/10` + 한 줄 코칭 | 4.0~4.6s |
+| 15 | full | `Workout complete.` · 30 REPS · 3 SETS | 5.0s |
+| 16 | full | `Today's workout` 요약 | 5.6s |
+| 17 | full | `Workout saved.` | 5.0s |
 | 18 | full | `Goodbye, Somi.` | 유지 |
+
+## 크기
+
+지름 10cm 는 병원 로봇(7인치 · 177.55mm)의 0.56배라, 같은 물리 크기로 읽히려면
+1080 좌표계 안의 활자를 1.78배로 키워야 한다. 그래서 본문 42→76px, 부가정보 30→52px,
+칩 20/14→36/26px 로 올렸고 화면당 문장은 한 호흡으로 줄였다.
 
 장면은 `index.html` 의 `SCENES` 배열 하나로만 관리한다. 문구·머무는 시간·칩 노출을
 거기서 고치면 되고, CSS 는 건드릴 필요가 없다.

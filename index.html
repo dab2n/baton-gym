@@ -192,8 +192,8 @@ body.search .rim::after{ opacity:1; }
 
 /* ---------- 기기 칩 : 스크린 상단에서 아래로 ---------- */
 .pill{
-  position:absolute; left:50%; top:150px; transform:translateX(-50%); z-index:3;
-  display:grid; place-items:center; padding:12px 30px;
+  position:absolute; left:50%; top:112px; transform:translateX(-50%); z-index:3;
+  display:grid; place-items:center; padding:20px 46px;
   border-radius:999px; overflow:hidden;
   opacity:0; translate:0 -30px;
   transition:opacity .5s ease, translate .8s cubic-bezier(.3,.9,.3,1);
@@ -202,14 +202,14 @@ body.chip .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
 .pbg{ position:absolute; inset:0; border-radius:inherit;
       background:rgba(255,248,190,.2); mix-blend-mode:color-burn; }
 .pill::after{ content:''; position:absolute; inset:0; border-radius:inherit;
-              box-shadow:inset 0 0 10px 0 #fff; pointer-events:none; }
-.pc{ grid-area:1/1; display:flex; align-items:center; justify-content:center; gap:12px;
+              box-shadow:inset 0 0 18px 0 #fff; pointer-events:none; }
+.pc{ grid-area:1/1; display:flex; align-items:center; justify-content:center; gap:20px;
      opacity:0; white-space:nowrap; transition:opacity .4s ease; }
 body.chip .pc{ opacity:1; transition-delay:.6s; }
-.pc b{ font-weight:500; font-size:20px; line-height:1.5; color:#2e2e0c; display:block; }
-.pc s{ font-weight:500; font-size:14px; line-height:1.5; color:rgba(46,46,12,.62);
+.pc b{ font-weight:500; font-size:36px; line-height:1.4; color:#2e2e0c; display:block; }
+.pc s{ font-weight:500; font-size:26px; line-height:1.4; color:rgba(46,46,12,.62);
        display:block; text-decoration:none; }
-.dumbbell{ width:52px; height:34px; flex:none; }
+.dumbbell{ width:88px; height:58px; flex:none; }
 
 /* ---------- 본문 : 한 장면 = 카운터 + 문장 + 부가정보 ---------- */
 /* flex 로 세로 중앙 정렬 — 줄 수·구성이 달라도 항상 스크린 정중앙 */
@@ -218,16 +218,16 @@ body.chip .pc{ opacity:1; transition-delay:.6s; }
      .rim(z1) 보다 뒤 DOM 이라 auto 로도 위에 온다 */
   position:absolute; inset:0;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:22px; padding:0 150px; pointer-events:none;
+  gap:34px; padding:0 130px; pointer-events:none;
 }
 .stage > *{ margin:0; text-align:center; mix-blend-mode:color-burn; color:#3e3d0a; }
 body.solid .stage > *{ mix-blend-mode:normal; }   /* 엄지척 이전 : 투명감 없이 단색 */
 
-.count{ font-size:196px; font-weight:600; line-height:1; letter-spacing:-.02em;
+.count{ font-size:240px; font-weight:600; line-height:1; letter-spacing:-.02em;
         font-variant-numeric:tabular-nums; }
 .count u{ text-decoration:none; font-weight:500; opacity:.42; }   /* "/ 10" 쪽 */
-.headline{ font-size:42px; font-weight:500; line-height:1.6; }
-.meta    { font-size:30px; font-weight:400; line-height:1.55; }
+.headline{ font-size:76px; font-weight:500; line-height:1.34; }
+.meta    { font-size:52px; font-weight:400; line-height:1.36; }
 .stage em{ font-style:normal; font-weight:600; }
 
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter;
@@ -323,36 +323,32 @@ const SCENES = [
   { look:'idle',   hold:0 },                                                   // 얼굴 대기
   { look:'fill',   hold:0, solid:true, delay:1750,                             // 01a 엄지척 대기
     text:'Hello, shall we start your workout?' },
-  { look:'search', hold:4200 },                                                // 01a Receiving…
+  { look:'search', hold:4200 },                                                // 01a 컨텍스트 수신
   { look:'full',   hold:4300, chip:true, delay:1500, hold1:true,               // 01b
     text:'Welcome back, <em>Somi.</em>' },
-  { look:'full',   hold:6000, chip:true,                                       // 01c
-    text:'Today&rsquo;s context', meta:'Shoulder · Mild discomfort<br>Upper-body workout' },
-  { look:'full',   hold:4600, chip:true, hold1:true,                           // 02a
-    text:'Analyzing your workout context…' },
-  { look:'full',   hold:6400, chip:true,                                       // 02b
-    text:'Workout setting adjusted.<br><em>Shoulder-friendly mode</em> recommended.',
-    meta:'Level 03 · Resistance Light' },
-  { look:'full',   hold:6000, chip:true,                                       // 02c
-    text:'Adjusting resistance.<br>Setting the handle for you.', meta:'Level 03 &rarr; <em>Level 02</em>' },
-  { look:'full',   hold:6000, chip:true,                                       // 02d
-    text:'You&rsquo;re all set.<br>Your workout has been adjusted to your condition.' },
-  { look:'full',   hold:5200, chip:true,                                       // 03a
-    text:'Ready? Let&rsquo;s begin your workout.', meta:'<em>10</em> REPS' },
-  { look:'full',   hold:4200, chip:true, count:'3<u>/10</u>', text:'Pull. Keep going.' },              // 03b
-  { look:'full',   hold:4600, chip:true, count:'4<u>/10</u>', text:'Pull slowly. Good pace.' },        // 03c
-  { look:'full',   hold:5200, chip:true, count:'5<u>/10</u>',                                          // 03d
-    text:'Resistance adjusted.', meta:'Adjusted for your current movement · <em>Level 02</em>' },
-  { look:'full',   hold:5600, chip:true, count:'10<u>/10</u>',                                         // 03e
-    text:'Set complete. Great work.', meta:'Take a short rest.' },
-  { look:'full',   hold:5200, chip:true,                                                               // 05a
+  { look:'full',   hold:5600, chip:true,                                       // 01c
+    text:'Today&rsquo;s context', meta:'Shoulder · Mild discomfort<br>Upper body' },
+  { look:'full',   hold:3800, chip:true, hold1:true, text:'Analyzing…' },       // 02a
+  { look:'full',   hold:5600, chip:true, hold1:true,                           // 02b
+    text:'<em>Shoulder-friendly</em> mode', meta:'Level 03 · Light' },
+  { look:'full',   hold:5000, chip:true, hold1:true,                           // 02c
+    text:'Adjusting for you.', meta:'Level 03 &rarr; <em>Level 02</em>' },
+  { look:'full',   hold:4200, chip:true, hold1:true, text:'You&rsquo;re all set.' },   // 02d
+  { look:'full',   hold:4600, chip:true, hold1:true,                           // 03a
+    text:'Ready?', meta:'<em>10</em> REPS' },
+  { look:'full',   hold:4000, chip:true, count:'3<u>/10</u>',  text:'Keep going.' },        // 03b
+  { look:'full',   hold:4000, chip:true, count:'4<u>/10</u>',  text:'Pull slowly.' },       // 03c
+  { look:'full',   hold:4600, chip:true, count:'5<u>/10</u>',                               // 03d
+    text:'Resistance adjusted.', meta:'Level 02' },
+  { look:'full',   hold:4600, chip:true, count:'10<u>/10</u>',                              // 03e
+    text:'Set complete.', meta:'Take a rest.' },
+  { look:'full',   hold:5000, chip:true, hold1:true,                                        // 05a
     text:'Workout complete.', meta:'<em>30</em> REPS · <em>3</em> SETS' },
-  { look:'full',   hold:6400, chip:true,                                                               // 05b
-    text:'Today&rsquo;s workout', meta:'Upper body<br>Resistance · Level 03<br>30 reps · 3 sets' },
-  { look:'full',   hold:6800, chip:true,                                                               // 05c
-    text:'Workout context saved.<br>Your settings have been recorded for your next session.' },
-  { look:'full',   hold:0, chip:true, hold1:true,                                                      // 05d
-    text:'Goodbye, <em>Somi.</em> See you next time.' },
+  { look:'full',   hold:5600, chip:true,                                                    // 05b
+    text:'Today&rsquo;s workout', meta:'Upper body · Level 03<br>30 reps · 3 sets' },
+  { look:'full',   hold:5000, chip:true, hold1:true,                                        // 05c
+    text:'Workout saved.', meta:'Ready for your next session.' },
+  { look:'full',   hold:0, chip:true, hold1:true, text:'Goodbye, <em>Somi.</em>' },         // 05d
 ];
 
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
