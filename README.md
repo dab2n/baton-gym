@@ -24,7 +24,7 @@
 | # | 그래픽 | 화면 | 다음으로 |
 |---|---|---|---|
 | 1 | idle | 검정 + 중앙 구슬이 배회·발광 | 얼굴 근접 |
-| 2 | fill | `Ring detected. / Ready to receive your workout context.` | 엄지척 |
+| 2 | fill | `Hello, shall we start your workout?` | 엄지척 |
 | 3 | search | 베젤 안쪽이 숨쉬듯 일렁임 (컨텍스트 수신) | 4.2s |
 | 4 | full | 기기 칩 등장 → `Welcome back, Somi.` | 4.3s |
 | 5 | full | `Today's context` · 어깨/상체 | 6.0s |
