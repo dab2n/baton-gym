@@ -420,10 +420,19 @@ toggle.addEventListener('click', () => {
   fit();
 });
 
-addEventListener('pointerdown', tap);
-addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') tap(); });
+const SOLO = new URLSearchParams(location.search).get('s');
 
-go(0);
+if (SOLO === null) {
+  addEventListener('pointerdown', tap);
+  addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') tap(); });
+  go(0);
+} else {
+  // 한 장면만 정지 : 자동 진행도 카메라도 없다
+  body.classList.add('bare', 'kiosk');
+  go(+SOLO);
+  clearTimeout(timer);
+  fit();
+}
 </script>
 
 <script type="module">
@@ -487,7 +496,8 @@ const loop = () => {
   if (wants && hits >= HITS) { hits = 0; window.__go(n + 1); }
 };
 
-try {
+if (new URLSearchParams(location.search).has('s')) say('');
+else try {
   const { FilesetResolver, FaceDetector, GestureRecognizer } = await import(V + '/vision_bundle.mjs');
   const vision = await FilesetResolver.forVisionTasks(V + '/wasm');
   [fd, gr] = await Promise.all([

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gym Robot · 전체 화면 모음</title>
+<style>
+  :root{ --cell: 300px; }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; padding:48px 40px 80px; background:#f5f5f3; color:#1b1b18;
+    font-family:'Delight','Pretendard','Inter',system-ui,sans-serif;
+    letter-spacing:-0.01em;
+  }
+  h1{ margin:0 0 6px; font-size:26px; font-weight:600; }
+  .sub{ margin:0 0 40px; font-size:14px; line-height:1.7; color:#77776e; }
+  .sub a{ color:#77776e; }
+  .grid{
+    display:grid; gap:34px 26px;
+    grid-template-columns:repeat(auto-fill, minmax(var(--cell), 1fr));
+    max-width:1560px;
+  }
+  figure{ margin:0; }
+  /* 화면은 1080 원본을 그대로 iframe 으로 띄우고 CSS 로만 축소한다 :
+     스크린샷이 아니라 실물이라 모션도 그대로 돈다 */
+  .screen{
+    display:block; position:relative; width:100%; aspect-ratio:1;
+    border-radius:50%; overflow:hidden; background:#000;
+    box-shadow:0 10px 30px rgba(0,0,0,.14);
+  }
+  .screen iframe{
+    position:absolute; inset:0; width:100%; height:100%;
+    border:0; display:block; pointer-events:none;
+  }
+  figcaption{ margin-top:12px; font-size:13px; line-height:1.55; }
+  .no{ display:inline-block; min-width:26px; font-weight:600; color:#b3b3a8; }
+  .nm{ font-weight:600; }
+  .dt{ display:block; margin-top:2px; color:#8a8a80; font-size:12px; }
+  .bar{ margin:44px 0 0; font-size:13px; color:#8a8a80; }
+  button{
+    font:inherit; font-size:13px; padding:8px 16px; border-radius:999px;
+    border:1px solid #d8d8d0; background:#fff; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>Gym Robot · 전체 화면 모음</h1>
+<p class="sub">
+  헬스장 로봇 GUI의 모든 장면(STAGE 01–05)입니다. 스크린샷이 아니라 실제 화면을 그대로 띄운 것이라 모션도 함께 돕니다.<br>
+  한 장면만 크게 보려면 <button id="reload">모션 다시 재생</button> 또는 각 화면을 클릭하세요.
+  전체 시나리오를 순서대로 보려면 <a href="./">index</a> 로.
+</p>
+
+<div class="grid" id="grid"></div>
+
+<p class="bar">dab2n/baton-gym · 화면 원본 1080 × 1080</p>
+
+<script>
+const SCENES = [
+  ['00',  '얼굴 대기',        'idle — 얼굴이 가까워지면 원이 커진다'],
+  ['01a', '엄지척 대기',      'Hello, shall we start your workout?'],
+  ['01a', '컨텍스트 수신',    'search — 회원 정보를 불러오는 중'],
+  ['01b', '인사',            'Welcome back, Somi.'],
+  ['01c', '오늘의 컨텍스트',  'Shoulder · Mild discomfort / Upper body'],
+  ['02a', '분석',            'Analyzing…'],
+  ['02b', '모드 결정',        'Shoulder-friendly mode · Level 03'],
+  ['02c', '강도 조정',        'Level 03 → Level 02'],
+  ['02d', '준비 완료',        'You’re all set.'],
+  ['03a', '세트 시작',        'Ready? · 10 REPS'],
+  ['03b', '수행 중 3/10',     'Keep going.'],
+  ['03c', '수행 중 4/10',     'Pull slowly.'],
+  ['03d', '실시간 조정 5/10',  'Resistance adjusted · Level 02'],
+  ['03e', '세트 완료 10/10',  'Set complete. / Take a rest.'],
+  ['05a', '운동 완료',        '30 REPS · 3 SETS'],
+  ['05b', '오늘의 기록',      'Upper body · Level 03 / 30 reps · 3 sets'],
+  ['05c', '저장',            'Workout saved.'],
+  ['05d', '작별',            'Goodbye, Somi.'],
+];
+
+const grid = document.getElementById('grid');
+const build = () => {
+  grid.replaceChildren();
+  SCENES.forEach(([no, name, detail], i) => {
+    const fig = document.createElement('figure');
+    fig.innerHTML =
+      '<a class="screen" href="index.html?s=' + i + '" target="_blank" rel="noopener">' +
+        '<iframe src="index.html?s=' + i + '" loading="lazy" title="' + no + ' ' + name + '"></iframe>' +
+      '</a>' +
+      '<figcaption><span class="no">' + no + '</span> <span class="nm">' + name + '</span>' +
+      '<span class="dt">' + detail + '</span></figcaption>';
+    grid.append(fig);
+  });
+};
+build();
+document.getElementById('reload').addEventListener('click', build);
+</script>
+</body>
+</html>
