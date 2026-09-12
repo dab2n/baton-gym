@@ -103,24 +103,24 @@ body.kiosk .cam{ display:none; }
    위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
 .screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none; }
 .screen::before{   /* 위 : 감청 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(27,39,67,0) 30%, rgba(26,37,62,.5) 66%, #1B2743 92%, #1B2743 100%);
-  -webkit-mask:linear-gradient(180deg,#000 0 14%, rgba(0,0,0,.82) 34%, transparent 66%);
-          mask:linear-gradient(180deg,#000 0 14%, rgba(0,0,0,.82) 34%, transparent 66%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(27,39,67,0) 58%, rgba(26,37,62,.45) 82%, #1B2743 97%, #1B2743 100%);
+  -webkit-mask:linear-gradient(180deg,#000 0 8%, rgba(0,0,0,.8) 22%, transparent 46%);
+          mask:linear-gradient(180deg,#000 0 8%, rgba(0,0,0,.8) 22%, transparent 46%); }
 .screen::after{    /* 아래 : 밝은 회색 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(74,74,74,0) 34%, rgba(62,62,62,.5) 70%, #4A4A4A 94%, #4A4A4A 100%);
-  -webkit-mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.9) 26%, transparent 58%);
-          mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.9) 26%, transparent 58%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(74,74,74,0) 60%, rgba(62,62,62,.45) 84%, #4A4A4A 97%, #4A4A4A 100%);
+  -webkit-mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.85) 20%, transparent 44%);
+          mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.85) 20%, transparent 44%); }
 /* 그 색이 가장자리를 따라 아주 천천히 돈다 : 원뿔 그라디언트를 테두리 쪽만 남기고 회전 */
 .rimlight{ position:absolute; inset:-8%; pointer-events:none;
   background:conic-gradient(from 0deg,
     rgba(27,39,67,0)    0deg, rgba(33,48,84,.55)  55deg, rgba(20,26,44,0)  135deg,
     rgba(74,74,74,0)  205deg, rgba(74,74,74,.45) 275deg, rgba(27,39,67,0)  360deg);
-  -webkit-mask:radial-gradient(circle closest-side, transparent 56%, #000 88%);
-          mask:radial-gradient(circle closest-side, transparent 56%, #000 88%);
+  -webkit-mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
+          mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
   animation:rimOrbit 18s linear infinite; }
 @keyframes rimOrbit{ to{ rotate:360deg; } }
-body.fill .screen::before, body.fill .screen::after{ opacity:.12; }
-body.fill .rimlight{ animation:none; opacity:.1; }
+body.fill .screen::before, body.fill .screen::after{ opacity:.8; }
+body.fill .rimlight{ opacity:.5; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
@@ -144,7 +144,7 @@ body.fill .rimlight{ animation:none; opacity:.1; }
 
 body.idle   .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 엄지척 대기 : 구슬이 화면을 채우지만 아주 옅게 + 색을 빼 화면은 어둡게 유지 */
-body.fill   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.045; filter:grayscale(1); }
+body.fill   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.03; filter:grayscale(1); }
 body.search .field{ transform:translate(1px,145.5px) scale(.58); opacity:.06; filter:grayscale(1); }
 body.full   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:0; }
 /* 색 블롭은 idle 에서만 : 검은 화면에선 파랗고 누렇게 비친다 */
