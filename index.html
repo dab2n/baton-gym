@@ -264,10 +264,25 @@ body.search .rim::after{ opacity:1; }
 .glim{ position:relative; }
 .glim::before, .glim::after{ content:attr(data-t); position:absolute; left:0; top:0;
   color:#FEFFF9; white-space:nowrap; pointer-events:none; text-align:left; opacity:0;
-  animation:glimFade .9s cubic-bezier(.2,.7,.2,1) both; animation-delay:var(--gd,0ms); }
-.glim::before{ filter:blur(.045em); -webkit-mask:linear-gradient(90deg,transparent 0%,#000 22%); mask:linear-gradient(90deg,transparent 0%,#000 22%); }
-.glim::after { filter:blur(.09em);  -webkit-mask:linear-gradient(90deg,transparent 5%,#000 45%); mask:linear-gradient(90deg,transparent 5%,#000 45%); }
-@keyframes glimFade{ from{ opacity:0; } to{ opacity:1; } }
+  animation:glimWipe .9s cubic-bezier(.2,.7,.2,1) both; animation-delay:var(--gd,0ms); }
+/* 마스크 두 겹 : 오른쪽으로 갈수록 짙어지는 번짐 + 왼→오로 열리는 와이프 (교집합).
+   글자가 왼쪽부터 나타나는 것과 같은 방향·같은 시각에 번짐이 따라온다 */
+.glim::before, .glim::after{
+  -webkit-mask-repeat:no-repeat;   mask-repeat:no-repeat;
+  -webkit-mask-position:0 0, 0 0;  mask-position:0 0, 0 0;
+  -webkit-mask-size:100% 100%, 140% 100%;  mask-size:100% 100%, 140% 100%;
+  -webkit-mask-composite:source-in;        mask-composite:intersect; }
+.glim::before{ filter:blur(.045em);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 22%), linear-gradient(90deg,#000 0 68%, transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0%,#000 22%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
+.glim::after { filter:blur(.09em);
+  -webkit-mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
+@keyframes glimWipe{
+  from{ opacity:0; -webkit-mask-size:100% 100%, 0% 100%;   mask-size:100% 100%, 0% 100%;   }
+  12% { opacity:1; }
+  to  { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
+}
 
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter;
     animation:in .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -342,7 +357,7 @@ const SCENES = [
     text:'Hello, shall we start your workout?' },
   { look:'search', hold:4200 },                                                // 01a 컨텍스트 수신
   { look:'full',   hold:4300, delay:1500, hold1:true,               // 01b
-    text:'Welcome back, <em>Somi.</em>' },
+    text:'Welcome back, <em>Leo.</em>' },
   { look:'full',   hold:5600, // 01c
     text:'Today&rsquo;s context', meta:'Shoulder · Mild discomfort<br>Upper body' },
   { look:'full',   hold:3800, hold1:true, text:'Analyzing…' },       // 02a
@@ -365,7 +380,7 @@ const SCENES = [
     text:'Today&rsquo;s workout', meta:'Upper body · Level 03<br>30 reps · 3 sets' },
   { look:'full',   hold:5000, hold1:true,                                        // 05c
     text:'Workout saved.', meta:'Ready for your next session.' },
-  { look:'full',   hold:0, hold1:true, text:'Goodbye, <em>Somi.</em>' },         // 05d
+  { look:'full',   hold:0, hold1:true, text:'Goodbye, <em>Leo.</em>' },         // 05d
 ];
 
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
