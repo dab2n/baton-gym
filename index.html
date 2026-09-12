@@ -4,9 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Gym Robot · Circular Screen</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* 좌표계 : 피그마 1080 단위를 그대로 CSS px 로 쓰고 마지막에 통째로 scale()
    병원 로봇(dab2n/baton)과 같은 디자인 시스템. 스크린/베젤/하우징/배경 레이어는 동일하고
@@ -24,13 +21,32 @@
 body.kiosk{ --fit: 1080; }     /* #screen : 실기기 */
 
 *{ box-sizing: border-box; }
-html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
+/* 스크린 밖 여백 : 채도 낮은 검정에 가까운 남색 (병원 로봇과 동일) */
+html,body{ height:100%; margin:0; overflow:hidden; background:#0B0F18; }
+html:has(.shot), html:has(.shot) body{ background:transparent; }   /* ?s=N : 배경색 없이 UI 만 */
 body{
   display:flex; align-items:center; justify-content:center;
-  font-family:'Delight','Pretendard','Inter',system-ui,sans-serif;
+  font-family:var(--ff-en,'Delight'), 'Pretendard Web', system-ui, sans-serif;
   -webkit-font-smoothing:antialiased;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
 }
+/* 자간 3% : letter-spacing 은 계산된 px 로 상속돼서 요소마다 em 을 다시 풀어준다 */
+.device, .device *{ letter-spacing:0.03em; }
+
+/* 폰트 대체 : Delight 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
+@font-face{ font-family:'Pretendard Web'; font-weight:400; font-display:swap;
+  src:local('Pretendard Regular'), local('Pretendard-Regular'), url('pretendard/Pretendard-Regular.subset.woff2') format('woff2'); }
+@font-face{ font-family:'Pretendard Web'; font-weight:500; font-display:swap;
+  src:local('Pretendard Medium'), local('Pretendard-Medium'), url('pretendard/Pretendard-Medium.subset.woff2') format('woff2'); }
+@font-face{ font-family:'Pretendard Web'; font-weight:600; font-display:swap;
+  src:local('Pretendard SemiBold'), local('Pretendard-SemiBold'), url('pretendard/Pretendard-SemiBold.subset.woff2') format('woff2'); }
+@font-face{ font-family:'Pretendard Web'; font-weight:700; font-display:swap;
+  src:local('Pretendard Bold'), local('Pretendard-Bold'), url('pretendard/Pretendard-Bold.subset.woff2') format('woff2'); }
+html.fb-en{ --ff-en:'Pretendard Web'; }
+html.fb-en .count{ letter-spacing:0.0433em; }      /* 600 240 */
+html.fb-en .headline, html.fb-en .headline *{ letter-spacing:0.0256em; }   /* 500 76 */
+html.fb-en .headline em, html.fb-en .headline em *{ letter-spacing:0.0366em; }
+html.fb-en .meta, html.fb-en .meta *{ letter-spacing:0.0165em; }           /* 400 52 */
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -76,8 +92,24 @@ body.kiosk .toggle{ display:none; }
 body.kiosk .cam{ display:none; }
 
 /* ---------- 스크린 1080x1080 ---------- */
-.screen{ position:absolute; inset:0; border-radius:50%;
-         background:#000; overflow:hidden; }
+.screen{
+  position:absolute; inset:0; border-radius:50%;
+  /* 위는 감청, 가운데 순검정, 아래 끝만 살짝 밝다 (병원 로봇과 동일 · 피그마 3124:17775) */
+  background:linear-gradient(180deg,#0F1627 8.7868%,#000 33.115%,#000 80.176%,#3D3D3D 98.493%)
+             no-repeat 0 20px / 100% 1040px, #000;
+  overflow:hidden;
+  clip-path:circle(520px at 540px 540px);
+}
+/* 위아래 색 띠가 아주 천천히 일렁인다 */
+.screen::before{ content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg,#16203A 0%,transparent 32%,transparent 72%,#4A4A4A 100%)
+             no-repeat 0 20px / 100% 1040px;
+  animation:screenSway 11s ease-in-out infinite; }
+@keyframes screenSway{
+  0%, 100%{ opacity:.3; translate:0 0;     }
+  50%     { opacity:.7; translate:0 -12px; }
+}
+body.fill .screen::before{ animation:none; opacity:.12; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
@@ -100,9 +132,12 @@ body.kiosk .cam{ display:none; }
 }
 
 body.idle   .field{ transform:translate(1px,145.5px) scale(.22); }
-body.fill   .field{ transform:translate(1px,145.5px) scale(1.2); }
-body.search .field{ transform:translate(1px,145.5px) scale(.58); }
-body.full   .field{ transform:translate(1px,145.5px) scale(1.2); }
+/* 엄지척 대기 : 구슬이 화면을 채우지만 아주 옅게 + 색을 빼 화면은 어둡게 유지 */
+body.fill   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.045; filter:grayscale(1); }
+body.search .field{ transform:translate(1px,145.5px) scale(.58); opacity:.06; filter:grayscale(1); }
+body.full   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:0; }
+/* 색 블롭은 idle 에서만 : 검은 화면에선 파랗고 누렇게 비친다 */
+body:not(.idle) .sheen, body:not(.idle) .core, body:not(.idle) .cyan{ opacity:0; }
 
 body.idle .sheen{ opacity:0; }
 body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
@@ -170,19 +205,19 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
 .rim{
   position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none;
   opacity:0; transition:opacity 1s ease;
-  box-shadow:inset 0 0 52px 8px rgba(255,250,214,.6);
+  box-shadow:inset 0 0 52px 8px rgba(254,255,249,.28);
 }
 /* full 로 넘어가도 애니메이션은 계속 돌린다 (끊긴 느낌 방지). 사라지는 건 opacity 만 */
 body.search .rim,
 body.full   .rim{ animation:breathe 3.4s ease-in-out infinite; }
 body.search .rim{ opacity:1; }
 @keyframes breathe{
-  0%,100%{ box-shadow:inset 0 0 44px  4px rgba(255,250,214,.45); }
-  50%    { box-shadow:inset 0 0 104px 30px rgba(255,250,214,.92); }
+  0%,100%{ box-shadow:inset 0 0 44px  4px rgba(254,255,249,.2); }
+  50%    { box-shadow:inset 0 0 104px 30px rgba(254,255,249,.45); }
 }
 .rim::after{
   content:''; position:absolute; inset:0; border-radius:inherit; opacity:0;
-  background:radial-gradient(circle at 50% 3%, rgba(255,255,255,.9), transparent 44%);
+  background:radial-gradient(circle at 50% 3%, rgba(254,255,249,.3), transparent 44%);
   filter:blur(44px); transition:opacity 1s ease;
 }
 body.search .rim::after,
@@ -190,45 +225,35 @@ body.full   .rim::after{ animation:orbit 11s linear infinite; }
 body.search .rim::after{ opacity:1; }
 @keyframes orbit{ to{ rotate:360deg; } }
 
-/* ---------- 기기 칩 : 스크린 상단에서 아래로 ---------- */
-.pill{
-  position:absolute; left:50%; top:112px; transform:translateX(-50%); z-index:3;
-  display:grid; place-items:center; padding:20px 46px;
-  border-radius:999px; overflow:hidden;
-  opacity:0; translate:0 -30px;
-  transition:opacity .5s ease, translate .8s cubic-bezier(.3,.9,.3,1);
-}
-body.chip .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
-.pbg{ position:absolute; inset:0; border-radius:inherit;
-      background:rgba(255,248,190,.2); mix-blend-mode:color-burn; }
-.pill::after{ content:''; position:absolute; inset:0; border-radius:inherit;
-              box-shadow:inset 0 0 18px 0 #fff; pointer-events:none; }
-.pc{ grid-area:1/1; display:flex; align-items:center; justify-content:center; gap:20px;
-     opacity:0; white-space:nowrap; transition:opacity .4s ease; }
-body.chip .pc{ opacity:1; transition-delay:.6s; }
-.pc b{ font-weight:500; font-size:36px; line-height:1.4; color:#2e2e0c; display:block; }
-.pc s{ font-weight:500; font-size:26px; line-height:1.4; color:rgba(46,46,12,.62);
-       display:block; text-decoration:none; }
-.dumbbell{ width:88px; height:58px; flex:none; }
-
 /* ---------- 본문 : 한 장면 = 카운터 + 문장 + 부가정보 ---------- */
 /* flex 로 세로 중앙 정렬 — 줄 수·구성이 달라도 항상 스크린 정중앙 */
 .stage{
-  /* z-index 를 주면 스택 컨텍스트가 생겨 color-burn 이 배경까지 못 닿는다.
-     .rim(z1) 보다 뒤 DOM 이라 auto 로도 위에 온다 */
+  /* .rim(z1) 보다 뒤 DOM 이라 z-index 없이도 위에 온다 */
   position:absolute; inset:0;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:34px; padding:0 130px; pointer-events:none;
 }
-.stage > *{ margin:0; text-align:center; mix-blend-mode:color-burn; color:#3e3d0a; }
-body.solid .stage > *{ mix-blend-mode:normal; }   /* 엄지척 이전 : 투명감 없이 단색 */
+.stage > *{ margin:0; text-align:center; color:#fff; }
 
 .count{ font-size:240px; font-weight:600; line-height:1; letter-spacing:-.02em;
         font-variant-numeric:tabular-nums; }
 .count u{ text-decoration:none; font-weight:500; opacity:.42; }   /* "/ 10" 쪽 */
-.headline{ font-size:76px; font-weight:500; line-height:1.34; }
-.meta    { font-size:52px; font-weight:400; line-height:1.36; }
-.stage em{ font-style:normal; font-weight:600; }
+.headline{ font-size:76px; font-weight:500; line-height:1.45; }
+.meta    { font-size:52px; font-weight:400; line-height:1.5; }
+/* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍 */
+.stage .w{ background:linear-gradient(180deg,#fff 0 66%,rgba(255,255,255,.55) 100%);
+           -webkit-background-clip:text; background-clip:text; color:transparent; }
+.stage em{ font-style:normal; font-weight:600; display:inline-block; }
+.stage em .w{ background:none; color:#fff; }
+/* 글리밍 : 같은 글자를 #FEFFF9 로 한 겹 더 얹고 오른쪽으로 갈수록 흐리게. 글자와 같은 시각에 함께 떠오른다
+   blur 를 em 단위로 : 헬스장은 글자가 76px 이라 px 로 고정하면 번짐이 너무 작다 */
+.glim{ position:relative; }
+.glim::before, .glim::after{ content:attr(data-t); position:absolute; left:0; top:0;
+  color:#FEFFF9; white-space:nowrap; pointer-events:none; text-align:left; opacity:0;
+  animation:glimFade .9s cubic-bezier(.2,.7,.2,1) both; animation-delay:var(--gd,0ms); }
+.glim::before{ filter:blur(.045em); -webkit-mask:linear-gradient(90deg,transparent 0%,#000 22%); mask:linear-gradient(90deg,transparent 0%,#000 22%); }
+.glim::after { filter:blur(.09em);  -webkit-mask:linear-gradient(90deg,transparent 5%,#000 45%); mask:linear-gradient(90deg,transparent 5%,#000 45%); }
+@keyframes glimFade{ from{ opacity:0; } to{ opacity:1; } }
 
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter;
     animation:in .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -243,7 +268,7 @@ body.solid .stage > *{ mix-blend-mode:normal; }   /* 엄지척 이전 : 투명�
 }
 </style>
 </head>
-<body class="idle">
+<body class="idle bare">
 
 <button class="toggle" type="button" aria-pressed="true">
   <span class="sw"></span><span class="lb">제품 목업</span>
@@ -271,34 +296,13 @@ body.solid .stage > *{ mix-blend-mode:normal; }   /* 엄지척 이전 : 투명�
 
     <div class="stage"></div>
 
-    <div class="pill">
-      <span class="pbg"></span>
-      <div class="pc">
-        <svg class="dumbbell" viewBox="0 0 52 34" aria-hidden="true">
-          <defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ffff80"/><stop offset="1" stop-color="#ffc943"/>
-          </linearGradient></defs>
-          <g fill="url(#dg)">
-            <rect x="0"  y="7"  width="7" height="20" rx="3"/>
-            <rect x="8"  y="2"  width="8" height="30" rx="3.5"/>
-            <rect x="16" y="14" width="20" height="6" rx="3"/>
-            <rect x="36" y="2"  width="8" height="30" rx="3.5"/>
-            <rect x="45" y="7"  width="7" height="20" rx="3"/>
-          </g>
-        </svg>
-        <div><b>K Fitness</b><s>Pull Station · 02</s></div>
-      </div>
-    </div>
+    <!-- 카메라 노치 : .screen 안에 두어 같은 clip-path 로 잘리게 한다. 베젤은 그리지 않는다 -->
+    <svg class="bezel" viewBox="0 0 1080 1080" aria-hidden="true">
+      <ellipse cx="540" cy="-10" rx="86" ry="88" fill="#000"/>
+    </svg>
+
   </div>
 
-  <!-- 베젤 : 피그마 176:581 (바깥 원 1080 - 실디스플레이 1030.43x1022.68) -->
-  <svg class="bezel" viewBox="0 0 1080 1080" aria-hidden="true">
-    <mask id="aa" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1080">
-      <rect width="1080" height="1080" fill="#fff"/>
-      <path transform="translate(24.63 32.36)" d="M425.668 0.282314C364.691 11.0315 306.254 32.7253 253.095 64.1911C195.831 98.0022 145.798 142.562 105.538 195.331C65.2771 248.1 35.5702 308.295 18.1761 372.4C9.96763 402.888 4.49532 434.159 1.75916 465.624C0.586523 480.869 0.00020106 495.918 0.00020106 511.162C0.00020106 518.589 0.195639 526.015 0.586519 533.442C0.977398 540.673 1.56372 548.1 2.15004 555.331C8.01323 616.895 24.821 676.895 51.7917 732.595C80.9123 792.4 121.173 845.755 170.424 890.315C219.87 934.875 277.329 969.273 339.87 991.944C369.577 1002.69 400.261 1010.71 431.531 1015.79C446.58 1018.33 461.629 1020.09 476.873 1021.26C491.531 1022.43 506.385 1022.82 521.238 1022.63C583.192 1021.85 644.365 1009.92 702.215 987.449C763.974 963.409 820.652 927.449 868.925 881.911C917.199 836.178 956.287 781.65 984.039 721.064C997.134 692.334 1007.69 662.432 1015.31 631.748C1019.02 616.895 1021.95 602.041 1024.3 586.992C1026.65 572.334 1028.21 557.677 1029.19 543.019C1033.49 481.26 1026.65 419.11 1008.86 359.696C989.903 296.178 958.828 236.764 917.394 185.168C875.961 133.377 824.951 90.1846 767.297 57.937C739.935 42.4973 711.01 29.7937 681.303 19.6308C667.036 14.7448 652.378 10.4452 637.72 6.92725C630.489 5.1683 623.258 3.60478 616.026 2.04126C612.508 1.2595 608.795 0.673181 605.277 0.0868621C604.105 0.0868621 603.323 -0.108578 602.15 0.0868621C600.977 0.0868621 600 0.47776 599.023 0.868639C597.069 1.6504 595.31 3.01848 594.137 4.77743C575.961 30.1846 546.645 45.038 515.375 45.038C484.105 45.038 454.984 29.9892 436.613 4.77743C434.072 1.25952 429.968 -0.499445 425.668 0.282314Z"/>
-    </mask>
-    <circle cx="540" cy="540" r="540" fill="#000" mask="url(#aa)"/>
-  </svg>
 </div>
 
 <script>
@@ -315,40 +319,38 @@ fit();
 /* ---------- 장면 목록 (피그마 2436:392 · STAGE 01~05) ----------
    look  : idle | fill | search | full
    hold  : 다음 장면까지 머무는 ms. 0 이면 카메라/탭 입력을 기다린다
-   chip  : 상단 기기 칩 노출
-   solid : 엄지척 이전 — 텍스트를 투명감 없이 단색으로
    delay : 첫 단어가 올라오기까지의 대기(ms). 그래픽이 자리잡은 뒤에 글이 오게
    hold1 : 한 호흡으로 읽히는 짧은 문장 — 문장부호에서 쉬지 않는다             */
 const SCENES = [
   { look:'idle',   hold:0 },                                                   // 얼굴 대기
-  { look:'fill',   hold:0, solid:true, delay:1750,                             // 01a 엄지척 대기
+  { look:'fill',   hold:0, delay:1750,                             // 01a 엄지척 대기
     text:'Hello, shall we start your workout?' },
   { look:'search', hold:4200 },                                                // 01a 컨텍스트 수신
-  { look:'full',   hold:4300, chip:true, delay:1500, hold1:true,               // 01b
+  { look:'full',   hold:4300, delay:1500, hold1:true,               // 01b
     text:'Welcome back, <em>Somi.</em>' },
-  { look:'full',   hold:5600, chip:true,                                       // 01c
+  { look:'full',   hold:5600, // 01c
     text:'Today&rsquo;s context', meta:'Shoulder · Mild discomfort<br>Upper body' },
-  { look:'full',   hold:3800, chip:true, hold1:true, text:'Analyzing…' },       // 02a
-  { look:'full',   hold:5600, chip:true, hold1:true,                           // 02b
+  { look:'full',   hold:3800, hold1:true, text:'Analyzing…' },       // 02a
+  { look:'full',   hold:5600, hold1:true,                           // 02b
     text:'<em>Shoulder-friendly</em> mode', meta:'Level 03 · Light' },
-  { look:'full',   hold:5000, chip:true, hold1:true,                           // 02c
+  { look:'full',   hold:5000, hold1:true,                           // 02c
     text:'Adjusting for you.', meta:'Level 03 &rarr; <em>Level 02</em>' },
-  { look:'full',   hold:4200, chip:true, hold1:true, text:'You&rsquo;re all set.' },   // 02d
-  { look:'full',   hold:4600, chip:true, hold1:true,                           // 03a
+  { look:'full',   hold:4200, hold1:true, text:'You&rsquo;re all set.' },   // 02d
+  { look:'full',   hold:4600, hold1:true,                           // 03a
     text:'Ready?', meta:'<em>10</em> REPS' },
-  { look:'full',   hold:4000, chip:true, count:'3<u>/10</u>',  text:'Keep going.' },        // 03b
-  { look:'full',   hold:4000, chip:true, count:'4<u>/10</u>',  text:'Pull slowly.' },       // 03c
-  { look:'full',   hold:4600, chip:true, count:'5<u>/10</u>',                               // 03d
+  { look:'full',   hold:4000, count:'3<u>/10</u>',  text:'Keep going.' },        // 03b
+  { look:'full',   hold:4000, count:'4<u>/10</u>',  text:'Pull slowly.' },       // 03c
+  { look:'full',   hold:4600, count:'5<u>/10</u>',                               // 03d
     text:'Resistance adjusted.', meta:'Level 02' },
-  { look:'full',   hold:4600, chip:true, count:'10<u>/10</u>',                              // 03e
+  { look:'full',   hold:4600, count:'10<u>/10</u>',                              // 03e
     text:'Set complete.', meta:'Take a rest.' },
-  { look:'full',   hold:5000, chip:true, hold1:true,                                        // 05a
+  { look:'full',   hold:5000, hold1:true,                                        // 05a
     text:'Workout complete.', meta:'<em>30</em> REPS · <em>3</em> SETS' },
-  { look:'full',   hold:5600, chip:true,                                                    // 05b
+  { look:'full',   hold:5600, // 05b
     text:'Today&rsquo;s workout', meta:'Upper body · Level 03<br>30 reps · 3 sets' },
-  { look:'full',   hold:5000, chip:true, hold1:true,                                        // 05c
+  { look:'full',   hold:5000, hold1:true,                                        // 05c
     text:'Workout saved.', meta:'Ready for your next session.' },
-  { look:'full',   hold:0, chip:true, hold1:true, text:'Goodbye, <em>Somi.</em>' },         // 05d
+  { look:'full',   hold:0, hold1:true, text:'Goodbye, <em>Somi.</em>' },         // 05d
 ];
 
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
@@ -391,6 +393,13 @@ const draw = s => {
     // 카운터는 한 덩어리로 먼저, 문장은 그다음 박자부터
     i = split(el, base, s.hold1 || cls === 'count', i) + (cls === 'count' ? 1 : 0);
   }
+  // 강조어(em)에 글리밍 겹 한 장 : 첫 단어와 같은 시각에 함께 떠오르게 지연을 물려준다
+  for (const em of stage.querySelectorAll('em')) {
+    em.classList.add('glim');
+    em.dataset.t = em.textContent;
+    const first = em.querySelector('.w');
+    if (first) em.style.setProperty('--gd', first.style.animationDelay);
+  }
 };
 
 const body = document.body;
@@ -403,7 +412,7 @@ const go = n => {
   body.className = [
     body.classList.contains('bare')  ? 'bare'  : '',
     body.classList.contains('kiosk') ? 'kiosk' : '',
-    s.look, s.chip ? 'chip' : '', s.solid ? 'solid' : '',
+    s.look,
   ].filter(Boolean).join(' ');
   draw(s);
   if (s.hold) timer = setTimeout(() => go(n + 1), s.hold);
@@ -428,7 +437,7 @@ if (SOLO === null) {
   go(0);
 } else {
   // 한 장면만 정지 : 자동 진행도 카메라도 없다
-  body.classList.add('bare', 'kiosk');
+  body.classList.add('bare', 'kiosk', 'shot');
   go(+SOLO);
   clearTimeout(timer);
   fit();
