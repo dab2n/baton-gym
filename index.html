@@ -101,7 +101,8 @@ body.kiosk .cam{ display:none; }
 /* 위아래 색 띠 (피그마 3124:17775 의 감청 / 밝은 회색) :
    직선 그라디언트는 검은 화면에서 경계가 가로줄로 보인다 → 스크린과 같은 중심(540,540)의 동심원으로 번지게 하고
    위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
-.screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none; }
+.screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none;
+  transition:opacity 1.4s ease; }   /* idle → fill 로 넘어갈 때 뚝 켜지지 않고 스며 나온다 */
 .screen::before{   /* 위 : 감청 */
   background:radial-gradient(circle 530px at 540px 540px, rgba(22,33,58,0) 68%, rgba(20,29,50,.4) 86%, #16213A 97%, #16213A 100%);
   -webkit-mask:linear-gradient(180deg,#000 0 7%, rgba(0,0,0,.7) 18%, transparent 32%);
@@ -119,7 +120,7 @@ body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacit
     rgba(62,69,83,0)  205deg, rgba(62,69,83,.4)  275deg, rgba(30,44,76,0)  360deg);
   -webkit-mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
           mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
-  opacity:.55; animation:rimOrbit 18s linear infinite; }
+  opacity:.55; transition:opacity 1.4s ease; animation:rimOrbit 18s linear infinite; }
 @keyframes rimOrbit{ to{ rotate:360deg; } }
 body.fill .screen::before, body.fill .screen::after{ opacity:.85; }
 body.fill .rimlight{ opacity:.35; }
@@ -419,10 +420,21 @@ const draw = s => {
 const body = document.body;
 let idx = 0, timer;
 
+const field = document.querySelector('.field');
 const go = n => {
   clearTimeout(timer);
   idx = n;
   const s = SCENES[n];
+  // idle 에서 나갈 때 : 배회 애니메이션을 끊으면 translate 가 0 으로 튀어 다른 물체처럼 보인다.
+  // 지금 값을 인라인으로 물려 class 를 바꾸고 다음 프레임에 지워, 전환이 그 자리에서 이어지게 한다
+  if (body.classList.contains('idle') && s.look !== 'idle') {
+    const cs = getComputedStyle(field);
+    field.style.translate = cs.translate; field.style.rotate = cs.rotate;
+    field.style.borderRadius = cs.borderRadius;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      field.style.translate = field.style.rotate = field.style.borderRadius = '';
+    }));
+  }
   body.className = [
     body.classList.contains('bare')  ? 'bare'  : '',
     body.classList.contains('kiosk') ? 'kiosk' : '',
