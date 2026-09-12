@@ -94,22 +94,33 @@ body.kiosk .cam{ display:none; }
 /* ---------- 스크린 1080x1080 ---------- */
 .screen{
   position:absolute; inset:0; border-radius:50%;
-  /* 위는 감청, 가운데 순검정, 아래 끝만 살짝 밝다 (병원 로봇과 동일 · 피그마 3124:17775) */
-  background:linear-gradient(180deg,#0F1627 8.7868%,#000 33.115%,#000 80.176%,#3D3D3D 98.493%)
-             no-repeat 0 20px / 100% 1040px, #000;
+  background:#000;
   overflow:hidden;
   clip-path:circle(520px at 540px 540px);
 }
-/* 위아래 색 띠가 아주 천천히 일렁인다 */
-.screen::before{ content:''; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(180deg,#16203A 0%,transparent 32%,transparent 72%,#4A4A4A 100%)
-             no-repeat 0 20px / 100% 1040px;
-  animation:screenSway 11s ease-in-out infinite; }
-@keyframes screenSway{
-  0%, 100%{ opacity:.3; translate:0 0;     }
-  50%     { opacity:.7; translate:0 -12px; }
-}
-body.fill .screen::before{ animation:none; opacity:.12; }
+/* 위아래 색 띠 (피그마 3124:17775 의 감청 / 밝은 회색) :
+   직선 그라디언트는 검은 화면에서 경계가 가로줄로 보인다 → 스크린과 같은 중심(540,540)의 동심원으로 번지게 하고
+   위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
+.screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none; }
+.screen::before{   /* 위 : 감청 */
+  background:radial-gradient(circle 530px at 540px 540px, rgba(27,39,67,0) 30%, rgba(26,37,62,.5) 66%, #1B2743 92%, #1B2743 100%);
+  -webkit-mask:linear-gradient(180deg,#000 0 14%, rgba(0,0,0,.82) 34%, transparent 66%);
+          mask:linear-gradient(180deg,#000 0 14%, rgba(0,0,0,.82) 34%, transparent 66%); }
+.screen::after{    /* 아래 : 밝은 회색 */
+  background:radial-gradient(circle 530px at 540px 540px, rgba(74,74,74,0) 34%, rgba(62,62,62,.5) 70%, #4A4A4A 94%, #4A4A4A 100%);
+  -webkit-mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.9) 26%, transparent 58%);
+          mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.9) 26%, transparent 58%); }
+/* 그 색이 가장자리를 따라 아주 천천히 돈다 : 원뿔 그라디언트를 테두리 쪽만 남기고 회전 */
+.rimlight{ position:absolute; inset:-8%; pointer-events:none;
+  background:conic-gradient(from 0deg,
+    rgba(27,39,67,0)    0deg, rgba(33,48,84,.55)  55deg, rgba(20,26,44,0)  135deg,
+    rgba(74,74,74,0)  205deg, rgba(74,74,74,.45) 275deg, rgba(27,39,67,0)  360deg);
+  -webkit-mask:radial-gradient(circle closest-side, transparent 56%, #000 88%);
+          mask:radial-gradient(circle closest-side, transparent 56%, #000 88%);
+  animation:rimOrbit 18s linear infinite; }
+@keyframes rimOrbit{ to{ rotate:360deg; } }
+body.fill .screen::before, body.fill .screen::after{ opacity:.12; }
+body.fill .rimlight{ animation:none; opacity:.1; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
@@ -286,6 +297,7 @@ body.search .rim::after{ opacity:1; }
   <div class="ring"></div>
 
   <div class="screen">
+    <div class="rimlight" aria-hidden="true"></div>
     <div class="blur39"><div class="field"></div></div>
     <div class="sheen"></div>
     <div class="core"></div>
