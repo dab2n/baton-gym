@@ -43,7 +43,6 @@ body{
 @font-face{ font-family:'Pretendard Web'; font-weight:700; font-display:swap;
   src:local('Pretendard Bold'), local('Pretendard-Bold'), url('pretendard/Pretendard-Bold.subset.woff2') format('woff2'); }
 html.fb-en{ --ff-en:'Pretendard Web'; }
-html.fb-en .count{ letter-spacing:0.0433em; }      /* 600 240 */
 html.fb-en .headline, html.fb-en .headline *{ letter-spacing:0.0256em; }   /* 500 76 */
 html.fb-en .headline em, html.fb-en .headline em *{ letter-spacing:0.0366em; }
 html.fb-en .meta, html.fb-en .meta *{ letter-spacing:0.0165em; }           /* 400 52 */
@@ -249,9 +248,14 @@ body.search .rim::after{ opacity:1; }
 }
 .stage > *{ margin:0; text-align:center; color:#fff; }
 
-.count{ font-size:240px; font-weight:600; line-height:1; letter-spacing:-.02em;
-        font-variant-numeric:tabular-nums; }
-.count u{ text-decoration:none; font-weight:500; opacity:.42; }   /* "/ 10" 쪽 */
+/* 숫자 : 병원 로봇 길안내와 같은 5x7 도트 (폰트 대신 직접 그린다).
+   숫자가 바뀔 때는 자리를 옮기지 않고 칸마다 불이 꺼지고 켜지며 한 칸씩 올라간다 */
+.count{ line-height:0; }
+.countdots{ display:block; overflow:visible; animation:countIn .5s ease both; }
+.countdots circle{ fill:#fff; opacity:0; transition:opacity .18s ease; }
+.countdots circle.on{ opacity:1; }
+.countdots .dim circle.on{ opacity:.42; }   /* "/10" 쪽 */
+@keyframes countIn{ from{ opacity:0; } to{ opacity:1; } }
 .headline{ font-size:76px; font-weight:500; line-height:1.45; }
 .meta    { font-size:52px; font-weight:400; line-height:1.5; }
 /* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍.
@@ -274,10 +278,10 @@ body.search .rim::after{ opacity:1; }
   -webkit-mask-position:0 0, 0 0;  mask-position:0 0, 0 0;
   -webkit-mask-size:100% 100%, 140% 100%;  mask-size:100% 100%, 140% 100%;
   -webkit-mask-composite:source-in;        mask-composite:intersect; }
-.glim::before{ filter:blur(.045em);
+.glim::before{ filter:blur(.025em);
   -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 22%), linear-gradient(90deg,#000 0 68%, transparent 100%);
           mask-image:linear-gradient(90deg,transparent 0%,#000 22%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
-.glim::after { filter:blur(.09em);
+.glim::after { filter:blur(.05em);
   -webkit-mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%);
           mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
 @keyframes glimWipe{
@@ -293,13 +297,13 @@ body.search .rim::after{ opacity:1; }
    색은 엄지척 구에서 : 흰 핵 · 연두 · 파랑 · 하늘 (글자마다 두 색 짝 --g1/--g2). 일반 글자는 옅게, 강조어는 짙게.
    강조어는 켜진 뒤에도 번짐이 글자를 따라 물결처럼 일렁인다. 번짐·흐림 크기는 em 단위 (글자가 52~240px 로 제각각) */
 @keyframes letterIn{
-  0%   { opacity:0; filter:blur(.16em)  drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
-  38%  { opacity:1; filter:blur(.016em) drop-shadow(0 0 .13em var(--g1)) drop-shadow(0 0 .34em var(--g2)); }
-  100% { opacity:1; filter:blur(0)      drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  0%   { opacity:0; filter:blur(.05em) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  38%  { opacity:1; filter:blur(0)     drop-shadow(0 0 .09em var(--g1)) drop-shadow(0 0 .22em var(--g2)); }
+  100% { opacity:1; filter:blur(0)     drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
 @keyframes emGlow{
-  from{ filter:blur(0) drop-shadow(0 0 .03em var(--g1)) drop-shadow(0 0 .08em var(--g2)); }
-  to  { filter:blur(0) drop-shadow(0 0 .18em var(--g1)) drop-shadow(0 0 .45em var(--g2)); }
+  from{ filter:blur(0) drop-shadow(0 0 .012em var(--g1)) drop-shadow(0 0 .03em var(--g2)); }
+  to  { filter:blur(0) drop-shadow(0 0 .04em var(--g1))  drop-shadow(0 0 .1em var(--g2)); }   /* 가장자리만 얇게 일렁인다 */
 }
 .stage .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms); }
 .stage em .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
@@ -428,6 +432,57 @@ const GLOW_EM   = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],    // 연�
                    ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],    // 하늘 · 라벤더
                    ['rgba(255,250,222,.95)', 'rgba(113,220,251,.75)']];  // 흰 핵 · 하늘
 const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => (parseFloat(a) * .35).toFixed(2) + ')')));
+// 숫자 : 5x7 도트 (병원 로봇 길안내와 같은 글리프). 칸마다 원을 미리 깔고 켜진 칸만 불을 켠다
+const GLYPH = {
+  0: '01110,10001,10011,10101,11001,10001,01110', 1: '00100,01100,00100,00100,00100,00100,01110',
+  2: '01110,10001,00001,00010,00100,01000,11111', 3: '11111,00010,00100,00010,00001,10001,01110',
+  4: '00010,00110,01010,10010,11111,00010,00010', 5: '11111,10000,11110,00001,00001,10001,01110',
+  6: '00110,01000,10000,11110,10001,10001,01110', 7: '11111,00001,00010,00100,01000,01000,01000',
+  8: '01110,10001,10001,01110,10001,10001,01110', 9: '01110,10001,10001,01111,00001,00010,01100',
+  '/': '00001,00010,00010,00100,01000,01000,10000', ' ': '00000,00000,00000,00000,00000,00000,00000',
+};
+const NS = 'http://www.w3.org/2000/svg';
+const DP = 25, DR = 9.5, DADV = 6 * DP;   // 칸 간격 · 도트 반지름 · 글자 한 칸(5칸 + 여백 1칸). 높이 약 170px
+let lastCount = 0, countRoll, countWait;
+const glyphInto = (g, ch) => {
+  const bits = GLYPH[ch].replaceAll(',', '');
+  [...g.children].forEach((d, n) => d.classList.toggle('on', bits[n] === '1'));
+};
+// 도트 카운트를 그리고 이전 숫자에서 목표 숫자까지 한 칸씩 올린다. 끝나는 시각(ms)을 돌려준다
+const drawCount = (el, to, total, start) => {
+  const slots = String(total).length;   // 총 횟수 자릿수만큼 자리를 미리 잡는다 : 3/10 · 10/10 모두 "/" 가 같은 자리에 있어 세트 내내 숫자가 옮겨 다니지 않는다
+  const chars = slots + 1 + String(total).length;
+  const w = (chars - 1) * DADV + 4 * DP + 2 * DR, h = 6 * DP + 2 * DR;
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'countdots');
+  svg.setAttribute('width', w); svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `${-DR} ${-DR} ${w} ${h}`);
+  svg.style.animationDelay = start + 'ms';
+  const groups = [...Array(chars)].map((_, i) => {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', `translate(${i * DADV},0)`);
+    if (i >= slots) g.setAttribute('class', 'dim');
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 5; c++) {
+      const d = document.createElementNS(NS, 'circle');
+      d.setAttribute('cx', c * DP); d.setAttribute('cy', r * DP); d.setAttribute('r', DR);
+      g.append(d);
+    }
+    svg.append(g);
+    return g;
+  });
+  const show = v => [...String(v).padStart(slots, ' ')].forEach((ch, i) => glyphInto(groups[i], ch));
+  [...('/' + total)].forEach((ch, i) => glyphInto(groups[slots + i], ch));
+  el.append(svg);
+  let v = Math.min(lastCount, to);
+  const steps = to - v;
+  show(v);
+  lastCount = to;
+  countWait = setTimeout(() => {
+    countRoll = setInterval(() => { v >= to ? clearInterval(countRoll) : show(++v); }, 110);
+  }, start + 250);
+  return start + 250 + steps * 110 + 200;
+};
+
 const STEP = 30;
 const letters = (el, t, hold1) => {
   const words = [...el.querySelectorAll('.w')];
@@ -458,14 +513,22 @@ const letters = (el, t, hold1) => {
 const draw = s => {
   stage.replaceChildren();
   let t = s.delay ?? 200;
+  clearTimeout(countWait); clearInterval(countRoll);
+  if (!s.count) lastCount = 0;   // 세트가 끝나면 다음 세트는 0 부터 센다
   for (const [cls, html] of [['count', s.count], ['headline', s.text], ['meta', s.meta]]) {
     if (!html) continue;
     const el = document.createElement(cls === 'count' ? 'div' : 'p');
-    el.className = cls; el.innerHTML = html;
+    el.className = cls;
     stage.append(el);
+    if (cls === 'count') {
+      const [, v, total] = /^(\d+)<u>\/(\d+)<\/u>$/.exec(html);
+      t = drawCount(el, +v, +total, t) + 380;   // 숫자가 다 올라간 뒤 문장이 이어진다
+      continue;
+    }
+    el.innerHTML = html;
     split(el);
     // 카운터 → 문장 → 보조 문구 : 줄마다 한 박자(380ms) 쉬고 이어서 흘러나온다
-    t = letters(el, t, s.hold1 || cls === 'count') + 380;
+    t = letters(el, t, s.hold1) + 380;
   }
   // 강조어(em)에 글리밍 겹 한 장 (시각은 letters 가 준 --t0 · --tn)
   for (const em of stage.querySelectorAll('em')) {
