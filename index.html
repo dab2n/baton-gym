@@ -254,17 +254,19 @@ body.search .rim::after{ opacity:1; }
 .count u{ text-decoration:none; font-weight:500; opacity:.42; }   /* "/ 10" 쪽 */
 .headline{ font-size:76px; font-weight:500; line-height:1.45; }
 .meta    { font-size:52px; font-weight:400; line-height:1.5; }
-/* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍 */
-.stage .w{ background:linear-gradient(180deg,#fff 0 66%,rgba(255,255,255,.55) 100%);
+/* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍.
+   색은 글자(.c)마다 입힌다 : 단어(.w)에 입히면 background-clip:text 가 아직 안 켜진 글자까지 그려 단어가 통째로 먼저 보인다 */
+.stage .c{ background:linear-gradient(180deg,#fff 0 66%,rgba(255,255,255,.55) 100%);
            -webkit-background-clip:text; background-clip:text; color:transparent; }
 .stage em{ font-style:normal; font-weight:600; display:inline-block; }
-.stage em .w{ background:none; color:#fff; }
+.stage em .c{ background:none; color:#fff; }
 /* 글리밍 : 같은 글자를 #FEFFF9 로 한 겹 더 얹고 오른쪽으로 갈수록 흐리게. 글자와 같은 시각에 함께 떠오른다
    blur 를 em 단위로 : 헬스장은 글자가 76px 이라 px 로 고정하면 번짐이 너무 작다 */
 .glim{ position:relative; }
 .glim::before, .glim::after{ content:attr(data-t); position:absolute; left:0; top:0;
   color:#FEFFF9; white-space:nowrap; pointer-events:none; text-align:left; opacity:0;
-  animation:glimWipe .9s cubic-bezier(.2,.7,.2,1) both; animation-delay:var(--gd,0ms); }
+  animation:glimWipe calc(var(--tn) * 1ms + 500ms) cubic-bezier(.3,.5,.4,1) both;
+  animation-delay:calc(var(--t0) * 1ms); }   /* 강조어의 첫 글자가 켜질 때 시작해 마지막 글자까지 훑는다 */
 /* 마스크 두 겹 : 오른쪽으로 갈수록 짙어지는 번짐 + 왼→오로 열리는 와이프 (교집합).
    글자가 왼쪽부터 나타나는 것과 같은 방향·같은 시각에 번짐이 따라온다 */
 .glim::before, .glim::after{
@@ -284,15 +286,27 @@ body.search .rim::after{ opacity:1; }
   to  { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
 }
 
-.w{ display:inline-block; opacity:0; will-change:transform,opacity,filter;
-    animation:in .9s cubic-bezier(.2,.7,.2,1) both; }
-@keyframes in{
-  from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
-  to  { opacity:1; transform:none;              filter:blur(0);    }
+.w{ display:inline-block; }   /* 단어는 줄바꿈 묶음만. 보이기·애니메이션은 글자(.c)에서 */
+
+/* ---------- 문장 등장 (병원 로봇과 같은 규칙) ----------
+   문장 단위로 왼쪽부터 한 글자씩 흘러나오고, 가장 최근에 나타난 글자에 유리·비눗방울 같은 색 번짐.
+   색은 엄지척 구에서 : 흰 핵 · 연두 · 파랑 · 하늘 (글자마다 두 색 짝 --g1/--g2). 일반 글자는 옅게, 강조어는 짙게.
+   강조어는 켜진 뒤에도 번짐이 글자를 따라 물결처럼 일렁인다. 번짐·흐림 크기는 em 단위 (글자가 52~240px 로 제각각) */
+@keyframes letterIn{
+  0%   { opacity:0; filter:blur(.16em)  drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  38%  { opacity:1; filter:blur(.016em) drop-shadow(0 0 .13em var(--g1)) drop-shadow(0 0 .34em var(--g2)); }
+  100% { opacity:1; filter:blur(0)      drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
+@keyframes emGlow{
+  from{ filter:blur(0) drop-shadow(0 0 .03em var(--g1)) drop-shadow(0 0 .08em var(--g2)); }
+  to  { filter:blur(0) drop-shadow(0 0 .18em var(--g1)) drop-shadow(0 0 .45em var(--g2)); }
+}
+.stage .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms); }
+.stage em .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
+  animation-delay:calc(var(--t) * 1ms), calc(var(--ei) * 90ms + var(--t0) * 1ms + .95s); }
 
 @media (prefers-reduced-motion:reduce){
-  .w{ animation:none; opacity:1; }
+  .w, .c{ animation:none; opacity:1; filter:none; }
   .field,.sheen,.core,.cyan,.rim,.rim::after{ animation:none; }
 }
 </style>
@@ -383,12 +397,10 @@ const SCENES = [
   { look:'full',   hold:0, hold1:true, text:'Goodbye, <em>Leo.</em>' },         // 05d
 ];
 
-const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
 const stage = document.querySelector('.stage');
 
-// 텍스트를 단어 단위로 쪼개고 DOM 순서대로 딜레이 부여
-const split = (el, base, hold1, start) => {
-  let i = start;
+// 텍스트를 단어(.w) 단위로 감싼다 : 줄바꿈이 단어 가운데서 일어나지 않게 하는 묶음
+const split = el => {
   const walk = node => {
     for (const child of [...node.childNodes]) {
       if (child.nodeType === 3) {
@@ -397,10 +409,7 @@ const split = (el, base, hold1, start) => {
           if (!part) continue;
           if (/^\s+$/.test(part)) { frag.append(part); continue; }
           const s = document.createElement('span');
-          s.className = 'w'; s.style.animationDelay = (i * 70 + base) + 'ms';
-          s.textContent = part;
-          // 문장이 끊기는 자리에서 한 박자 쉰다
-          i += !hold1 && /[,.?!…]$/.test(part) ? PAUSE : 1;
+          s.className = 'w'; s.textContent = part;
           frag.append(s);
         }
         child.replaceWith(frag);
@@ -408,27 +417,60 @@ const split = (el, base, hold1, start) => {
     }
   };
   walk(el);
-  return i;
+};
+
+// 문장 단위로 한 글자씩 (병원 로봇과 같은 규칙) : 단어 안 글자를 인라인 .c 로 쪼개 글자마다 시작 시각 --t(ms).
+//  · 한 줄 안에서는 글자(띄어쓰기 한 칸 포함)가 30ms 간격으로 끊김 없이 흘러나온다 (등장 0.95s 라 겹쳐 번진다)
+//  · 문장 끝(.?!…) 뒤 +450ms. 한 호흡 문장(hold1)은 쉬지 않는다
+//  · 일반 글자 번짐은 옅은 색, 강조어(em)는 짙은 색. 강조어에는 첫 글자 시각 --t0, 길이 --tn, 강조어 안 순서 --ei
+//  · inline span 이라 커닝이 끊기지 않는다
+const GLOW_EM   = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],    // 연두 · 파랑
+                   ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],    // 하늘 · 라벤더
+                   ['rgba(255,250,222,.95)', 'rgba(113,220,251,.75)']];  // 흰 핵 · 하늘
+const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => (parseFloat(a) * .35).toFixed(2) + ')')));
+const STEP = 30;
+const letters = (el, t, hold1) => {
+  const words = [...el.querySelectorAll('.w')];
+  words.forEach((w, wi) => {
+    const text = w.textContent; w.textContent = '';
+    const em = !!w.closest('em');
+    [...text].forEach((ch, j) => {
+      const c = document.createElement('span');
+      c.className = 'c'; c.textContent = ch;
+      c.style.setProperty('--t', Math.round(t));
+      const [g1, g2] = (em ? GLOW_EM : GLOW_SOFT)[(wi + j) % 3];
+      c.style.setProperty('--g1', g1); c.style.setProperty('--g2', g2);
+      w.append(c);
+      t += STEP;
+    });
+    if (wi < words.length - 1) t += STEP + (!hold1 && /[.?!…]$/.test(text) ? 450 : 0);
+  });
+  el.querySelectorAll('em').forEach(em => {
+    const cs = [...em.querySelectorAll('.c')];
+    if (!cs.length) return;
+    const t0 = +cs[0].style.getPropertyValue('--t'), t1 = +cs.at(-1).style.getPropertyValue('--t');
+    em.style.setProperty('--t0', t0); em.style.setProperty('--tn', t1 - t0);
+    cs.forEach((c, n) => c.style.setProperty('--ei', n));
+  });
+  return t;
 };
 
 const draw = s => {
   stage.replaceChildren();
-  const base = s.delay ?? 200;
-  let i = 0;
+  let t = s.delay ?? 200;
   for (const [cls, html] of [['count', s.count], ['headline', s.text], ['meta', s.meta]]) {
     if (!html) continue;
     const el = document.createElement(cls === 'count' ? 'div' : 'p');
     el.className = cls; el.innerHTML = html;
     stage.append(el);
-    // 카운터는 한 덩어리로 먼저, 문장은 그다음 박자부터
-    i = split(el, base, s.hold1 || cls === 'count', i) + (cls === 'count' ? 1 : 0);
+    split(el);
+    // 카운터 → 문장 → 보조 문구 : 줄마다 한 박자(380ms) 쉬고 이어서 흘러나온다
+    t = letters(el, t, s.hold1 || cls === 'count') + 380;
   }
-  // 강조어(em)에 글리밍 겹 한 장 : 첫 단어와 같은 시각에 함께 떠오르게 지연을 물려준다
+  // 강조어(em)에 글리밍 겹 한 장 (시각은 letters 가 준 --t0 · --tn)
   for (const em of stage.querySelectorAll('em')) {
     em.classList.add('glim');
     em.dataset.t = em.textContent;
-    const first = em.querySelector('.w');
-    if (first) em.style.setProperty('--gd', first.style.animationDelay);
   }
 };
 
