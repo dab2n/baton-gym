@@ -245,14 +245,14 @@ body.search .rim::after{ opacity:1; }
    .sring 한 묶음 = 흐린 영상(.sglow) + 바깥으로 갈수록 더 흐려지는 고리 세 겹(.pb) + 그 위 검은 원(.sdisc).
    z-index 0 : 뒤에 오는 문구보다 아래 (검은 원이 글자를 가리지 않게) */
 .sring{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity .6s ease; }
-.sglow{ position:absolute; inset:0; filter:blur(9px) brightness(1.55); }   /* 영상을 먼저 원형으로 자른 뒤 흐린다 : 사각 테두리 없이 번짐이 바깥으로 퍼진다 */
+.sglow{ position:absolute; inset:0; filter:blur(4px) brightness(1.25); }   /* 영상을 먼저 원형으로 자른 뒤 흐린다 : 사각 테두리 없이 번짐이 바깥으로 퍼진다 */
 .pb{ position:absolute; inset:0; }
 /* progressive : 링(R 410)에서 바깥으로 갈수록 흐림이 세진다 */
-.pb1{ -webkit-backdrop-filter:blur(7px);  backdrop-filter:blur(7px);
+.pb1{ -webkit-backdrop-filter:blur(3px);  backdrop-filter:blur(3px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 404px, #000 420px); mask:radial-gradient(circle at 540px 540px, transparent 404px, #000 420px); }
-.pb2{ -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+.pb2{ -webkit-backdrop-filter:blur(6px);  backdrop-filter:blur(6px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 418px, #000 442px); mask:radial-gradient(circle at 540px 540px, transparent 418px, #000 442px); }
-.pb3{ -webkit-backdrop-filter:blur(30px); backdrop-filter:blur(30px);
+.pb3{ -webkit-backdrop-filter:blur(11px); backdrop-filter:blur(11px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); }
 /* 검은 원 : 링보다 살짝 작게. 반지름이 숨쉬듯 조금씩 드나들어 빛의 안쪽 경계가 가장자리를 따라 일렁인다 */
 @property --dr{ syntax:'<length>'; inherits:false; initial-value:400px; }
