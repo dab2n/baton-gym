@@ -643,6 +643,7 @@ const go = n => {
   body.className = [
     body.classList.contains('bare')  ? 'bare'  : '',
     body.classList.contains('kiosk') ? 'kiosk' : '',
+    body.classList.contains('shot')  ? 'shot'  : '',   // 투명 배경 내보내기 유지
     s.look,
   ].filter(Boolean).join(' ');
   draw(s);
