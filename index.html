@@ -594,20 +594,32 @@ const stroke = document.querySelector('.stroke');
 const sdisc = document.querySelector('.sdisc');
 const RING = [[0, 405], [.05, 413], [.1, 415], [.15, 420], [.2, 422], [.25, 428], [.3, 433], [.35, 445],
               [.4, 453], [.45, 477], [.5, 492], [.55, 511], [.6, 512], [.65, 515], [.7, 516]];   // 영상 시각(s) → 링 반지름(영상 px)
-const ringAt = t => {
-  const i = RING.findIndex(([s]) => s > t);
-  if (i < 0) return RING.at(-1)[1];
-  const [t0, r0] = RING[i - 1], [t1, r1] = RING[i];
-  return r0 + (r1 - r0) * (t - t0) / (t1 - t0);
+const lerpAt = (tab, t) => {
+  const i = tab.findIndex(([s]) => s > t);
+  if (i < 0) return tab.at(-1)[1];
+  const [t0, v0] = tab[i - 1], [t1, v1] = tab[i];
+  return v0 + (v1 - v0) * (t - t0) / (t1 - t0);
+};
+const ringAt = t => lerpAt(RING, t);
+// 등장 밝기 : 영상은 0.4~0.5s 에 밝기가 두 배로 뛰었다가 안정값(21.5)보다 14% 솟는다 → 번쩍.
+// 실측 밝기(E)로 나눠 겉보기 밝기가 매끄러운 곡선(smoothstep 0 → 0.72s)을 따르게 투명도를 준다
+const ENERGY = [[0, .22], [.05, .6], [.1, 3.35], [.15, 5.42], [.2, 8.67], [.25, 9.78], [.3, 11.19], [.35, 11.69],
+                [.4, 13.51], [.45, 16.12], [.5, 24.23], [.55, 24.54], [.6, 22.6], [.65, 21.93], [.7, 21.43]];
+const sglow = document.querySelector('.sglow');
+// 재생 시각과 화면에 뜬 프레임은 몇십 ms 어긋난다 → 앞뒤 0.1s 안에서 가장 밝은 프레임 기준으로 (넉넉히 누른다)
+const glowAt = t => {
+  const x = Math.min(1, t / .72), goal = 21.5 * x * x * (3 - 2 * x);
+  return Math.min(1, ...[-.1, -.05, 0, .05, .1].map(d => goal / lerpAt(ENERGY, Math.max(0, t + d))));
 };
 const discLoop = () => {
   requestAnimationFrame(discLoop);
   const t = stroke.currentTime;
-  if (t < .7) {
+  if (t < .72) {
     sdisc.style.animation = 'none';
     sdisc.style.setProperty('--dr', (ringAt(t) * .8 - 17).toFixed(1) + 'px');   // .8 = 영상 축소 비율
+    sglow.style.opacity = glowAt(t).toFixed(3);
   } else if (sdisc.style.animation) {
-    sdisc.style.animation = ''; sdisc.style.removeProperty('--dr');
+    sdisc.style.animation = ''; sdisc.style.removeProperty('--dr'); sglow.style.opacity = '';
   }
 };
 discLoop();
