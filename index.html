@@ -255,7 +255,10 @@ body.search .rim::after{ opacity:1; }
 .pb3{ -webkit-backdrop-filter:blur(11px); backdrop-filter:blur(11px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); }
 /* 검은 원 : 링보다 살짝 작게. 반지름이 숨쉬듯 조금씩 드나들어 빛의 안쪽 경계가 가장자리를 따라 일렁인다 */
-.sdisc{ position:absolute; inset:0; background:#000; clip-path:circle(400px at 540px 540px); }   /* 일렁이는 모양은 JS discLoop */
+/* 일렁이는 모양은 안쪽 <i> 를 자르고(JS discLoop) 바깥을 흐려 가장자리를 부드럽게 : 검은 도형이 있다는 인상 없이 빛이 안쪽으로 스며들게.
+   (한 요소에 흐림과 자르기를 같이 주면 흐린 뒤 잘라 경계가 다시 또렷해진다) */
+.sdisc{ position:absolute; inset:0; filter:blur(10px); }
+.sdisc > i{ position:absolute; inset:0; background:#000; clip-path:circle(398px at 540px 540px); }
 /* 링 빛도 아주 살짝 타원으로 흔들려 검은 원과 어긋나며 굵기가 둘레를 따라 달라진다 */
 .sglow{ animation:ringWob 4.3s ease-in-out infinite; }
 @keyframes ringWob{ 0%, 100%{ scale:1 1; } 25%{ scale:1.012 .992; } 50%{ scale:.994 1.01; } 75%{ scale:1.008 .996; } }
@@ -387,7 +390,7 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
       </video>
       </div>
       <div class="pb pb1"></div><div class="pb pb2"></div><div class="pb pb3"></div>
-      <div class="sdisc"></div>
+      <div class="sdisc"><i></i></div>
     </div>
 
     <div class="stage"></div>
@@ -593,7 +596,7 @@ const stroke = document.querySelector('.stroke');
 // 검은 원 : 링 안쪽을 또렷하게 자르며 보이스 UI 처럼 일렁인다. 반지름이 숨쉬고(396~405),
 // 둘레는 몇 개의 느린 물결(2·3·5번 굽이)이 서로 다른 속도로 흘러 정원이 아닌 살아 있는 고리가 된다.
 // 영상 속 링의 등장(0~0.75s)은 쓰지 않는다 : 등장은 CSS ringIn 이 가운데에서 부드럽게 키운다
-const sdisc = document.querySelector('.sdisc');
+const sdisc = document.querySelector('.sdisc > i');
 const RSTART = .75;
 stroke.currentTime = RSTART;
 const discLoop = () => {
