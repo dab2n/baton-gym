@@ -255,18 +255,19 @@ body.search .rim::after{ opacity:1; }
 .pb3{ -webkit-backdrop-filter:blur(11px); backdrop-filter:blur(11px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); }
 /* 검은 원 : 링보다 살짝 작게. 반지름이 숨쉬듯 조금씩 드나들어 빛의 안쪽 경계가 가장자리를 따라 일렁인다 */
-@property --dr{ syntax:'<length>'; inherits:false; initial-value:400px; }
-.sdisc{ position:absolute; inset:0;
-  background:radial-gradient(circle at 540px 540px, #000 calc(var(--dr) - 3px), transparent var(--dr));
-  animation:discBreath 3.6s ease-in-out infinite alternate; }
-@keyframes discBreath{ from{ --dr:396px; } to{ --dr:405px; } }
+.sdisc{ position:absolute; inset:0; background:#000; clip-path:circle(400px at 540px 540px); }   /* 일렁이는 모양은 JS discLoop */
+/* 링 빛도 아주 살짝 타원으로 흔들려 검은 원과 어긋나며 굵기가 둘레를 따라 달라진다 */
+.sglow{ animation:ringWob 4.3s ease-in-out infinite; }
+@keyframes ringWob{ 0%, 100%{ scale:1 1; } 25%{ scale:1.012 .992; } 50%{ scale:.994 1.01; } 75%{ scale:1.008 .996; } }
+/* 등장 : 가운데의 작은 고리에서 부드럽게 커지며, 처음엔 어둡다가 다 커졌을 때 완전히 밝게 */
+@keyframes ringIn{ 0%{ scale:.16; filter:brightness(.22); } 55%{ filter:brightness(.55); } 100%{ scale:1; filter:brightness(1); } }
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          scale:.8;     /* 링을 가장자리가 아니라 안쪽에 : 밝은 선 R 513 × .8 ≈ 410 (스크린 520 의 75%, 레퍼런스 실측) */
          /* 줄이면 영상 프레임(1080) 끝이 사각으로 보인다 → 링 바로 바깥에서 원형으로 흐려 끊는다 (흐림은 부모 .sglow 에서) */
          -webkit-mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
                  mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
          pointer-events:none; }
-body.full .sring{ opacity:1; }
+body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) both; }
 /* 스트로크가 도는 동안은 영상만 : 위아래 색 띠와 가장자리 발광을 끈다 */
 body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacity:0; }
 
@@ -589,38 +590,25 @@ let idx = 0, timer;
 
 const field = document.querySelector('.field');
 const stroke = document.querySelector('.stroke');
-// 검은 원을 영상 속 링에 붙인다 : 등장 구간(0~0.7s)의 링 반지름을 실측해 두고, 재생 시각에 맞춰 원을 링 바로 안쪽(17px)에 둔다.
-// CSS 로 따로 키우면 영상이 늦게 뜨거나 곡선이 달라 링과 원이 어긋난다. 등장이 끝나면 CSS 숨쉬기(396~405)가 이어받는다
+// 검은 원 : 링 안쪽을 또렷하게 자르며 보이스 UI 처럼 일렁인다. 반지름이 숨쉬고(396~405),
+// 둘레는 몇 개의 느린 물결(2·3·5번 굽이)이 서로 다른 속도로 흘러 정원이 아닌 살아 있는 고리가 된다.
+// 영상 속 링의 등장(0~0.75s)은 쓰지 않는다 : 등장은 CSS ringIn 이 가운데에서 부드럽게 키운다
 const sdisc = document.querySelector('.sdisc');
-const RING = [[0, 405], [.05, 413], [.1, 415], [.15, 420], [.2, 422], [.25, 428], [.3, 433], [.35, 445],
-              [.4, 453], [.45, 477], [.5, 492], [.55, 511], [.6, 512], [.65, 515], [.7, 516]];   // 영상 시각(s) → 링 반지름(영상 px)
-const lerpAt = (tab, t) => {
-  const i = tab.findIndex(([s]) => s > t);
-  if (i < 0) return tab.at(-1)[1];
-  const [t0, v0] = tab[i - 1], [t1, v1] = tab[i];
-  return v0 + (v1 - v0) * (t - t0) / (t1 - t0);
-};
-const ringAt = t => lerpAt(RING, t);
-// 등장 밝기 : 영상은 0.4~0.5s 에 밝기가 두 배로 뛰었다가 안정값(21.5)보다 14% 솟는다 → 번쩍.
-// 실측 밝기(E)로 나눠 겉보기 밝기가 매끄러운 곡선(smoothstep 0 → 0.72s)을 따르게 투명도를 준다
-const ENERGY = [[0, .22], [.05, .6], [.1, 3.35], [.15, 5.42], [.2, 8.67], [.25, 9.78], [.3, 11.19], [.35, 11.69],
-                [.4, 13.51], [.45, 16.12], [.5, 24.23], [.55, 24.54], [.6, 22.6], [.65, 21.93], [.7, 21.43]];
-const sglow = document.querySelector('.sglow');
-// 재생 시각과 화면에 뜬 프레임은 몇십 ms 어긋난다 → 앞뒤 0.1s 안에서 가장 밝은 프레임 기준으로 (넉넉히 누른다)
-const glowAt = t => {
-  const x = Math.min(1, t / .72), goal = 21.5 * x * x * (3 - 2 * x);
-  return Math.min(1, ...[-.1, -.05, 0, .05, .1].map(d => goal / lerpAt(ENERGY, Math.max(0, t + d))));
-};
+const RSTART = .75;
+stroke.currentTime = RSTART;
 const discLoop = () => {
   requestAnimationFrame(discLoop);
-  const t = stroke.currentTime;
-  if (t < .72) {
-    sdisc.style.animation = 'none';
-    sdisc.style.setProperty('--dr', (ringAt(t) * .8 - 17).toFixed(1) + 'px');   // .8 = 영상 축소 비율
-    sglow.style.opacity = glowAt(t).toFixed(3);
-  } else if (sdisc.style.animation) {
-    sdisc.style.animation = ''; sdisc.style.removeProperty('--dr'); sglow.style.opacity = '';
+  if (stroke.paused) return;
+  const s = performance.now() / 1000;
+  const R = 400.5 + 4.5 * Math.sin(s * 1.75);
+  const amp = 7 + 4 * Math.sin(s * .9);   // 일렁임 폭(px) : 말하듯 커졌다 작아졌다
+  const pts = [];
+  for (let i = 0; i < 90; i++) {
+    const a = i / 90 * 6.2832;
+    const r = R + amp * (.5 * Math.sin(3 * a + s * 1.9) + .3 * Math.sin(5 * a - s * 2.6) + .4 * Math.sin(2 * a + s * 1.1 + 1));
+    pts.push(`${(540 + r * Math.cos(a)).toFixed(1)}px ${(540 + r * Math.sin(a)).toFixed(1)}px`);
   }
+  sdisc.style.clipPath = `polygon(${pts.join(',')})`;
 };
 discLoop();
 stroke.playbackRate = .8;   // 병원 로봇과 같은 속도
@@ -647,7 +635,7 @@ const go = n => {
     s.look,
   ].filter(Boolean).join(' ');
   draw(s);
-  if (s.look === 'full') stroke.play().catch(() => {}); else { stroke.pause(); stroke.currentTime = 0; }
+  if (s.look === 'full') stroke.play().catch(() => {}); else { stroke.pause(); stroke.currentTime = RSTART; }
   if (s.hold) timer = setTimeout(() => go(n + 1), s.hold);
 };
 // 카메라가 없을 때의 수동 진행 : 한 단계씩, 마지막에서 리셋
