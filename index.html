@@ -26,14 +26,14 @@ html,body{ height:100%; margin:0; overflow:hidden; background:#0B0F18; }
 html:has(.shot), html:has(.shot) body{ background:transparent; }   /* ?s=N : 배경색 없이 UI 만 */
 body{
   display:flex; align-items:center; justify-content:center;
-  font-family:var(--ff-en,'Delight'), 'Pretendard Web', system-ui, sans-serif;
+  font-family:var(--ff-en,'Magnetik'), 'Pretendard Web', system-ui, sans-serif;
   -webkit-font-smoothing:antialiased;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
 }
-/* 자간 3% : letter-spacing 은 계산된 px 로 상속돼서 요소마다 em 을 다시 풀어준다 */
-.device, .device *{ letter-spacing:0.03em; }
+/* 자간 : Magnetik 은 -2% (letter-spacing 은 계산된 px 로 상속돼서 요소마다 em 을 다시 풀어준다) */
+.device, .device *{ letter-spacing:-0.02em; }
 
-/* 폰트 대체 : Delight 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
+/* 폰트 대체 : Magnetik 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
 @font-face{ font-family:'Pretendard Web'; font-weight:400; font-display:swap;
   src:local('Pretendard Regular'), local('Pretendard-Regular'), url('pretendard/Pretendard-Regular.subset.woff2') format('woff2'); }
 @font-face{ font-family:'Pretendard Web'; font-weight:500; font-display:swap;
@@ -43,9 +43,6 @@ body{
 @font-face{ font-family:'Pretendard Web'; font-weight:700; font-display:swap;
   src:local('Pretendard Bold'), local('Pretendard-Bold'), url('pretendard/Pretendard-Bold.subset.woff2') format('woff2'); }
 html.fb-en{ --ff-en:'Pretendard Web'; }
-html.fb-en .headline, html.fb-en .headline *{ letter-spacing:0.0256em; }   /* 500 76 */
-html.fb-en .headline em, html.fb-en .headline em *{ letter-spacing:0.0366em; }
-html.fb-en .meta, html.fb-en .meta *{ letter-spacing:0.0165em; }           /* 400 52 */
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -79,6 +76,16 @@ body.bare .ring{ display:none; }
 body.bare .toggle .sw{ background:#d6d6d6; }
 body.bare .toggle .sw::after{ transform:none; }
 body.kiosk .toggle{ display:none; }
+/* 장면 바로 가기 : 구간별로 골라 그 자리부터 재생 (디자인 확인용) */
+.jump{ position:fixed; left:16px; top:50%; translate:0 -50%; z-index:10; display:flex; flex-direction:column; gap:4px;
+  padding:6px; border-radius:22px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.14); }
+.jump button{ font:inherit; font-size:12px; font-weight:500; line-height:1; padding:9px 14px; border:0; border-radius:999px;
+  background:transparent; color:#000; cursor:pointer; text-align:left; }
+.jump button:hover{ background:#f2f2f2; }
+.jump button.on{ background:#000; color:#fff; }
+.jump, .jump button{ cursor:pointer; }
+body.device .jump, body.shot .jump{ display:none; }
+body.rec .cam, body.rec .toggle{ display:none; }
 
 /* 카메라 모니터 (테스트용) */
 .cam{ position:fixed; right:16px; bottom:16px; z-index:10; width:240px; }
@@ -246,7 +253,7 @@ body.search .rim::after{ opacity:1; }
    z-index 0 : 뒤에 오는 문구보다 아래 (검은 원이 글자를 가리지 않게) */
 .sring{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity .6s ease; }
 .sglow{ position:absolute; inset:0; filter:blur(4px) brightness(1.25); }   /* 영상을 먼저 원형으로 자른 뒤 흐린다 : 사각 테두리 없이 번짐이 바깥으로 퍼진다 */
-.pb{ position:absolute; inset:0; }
+.pb{ position:absolute; inset:0; opacity:var(--pb, 1); transition:opacity .5s ease; }   /* 커지는 동안(--pb 0) 꺼서 등장이 매끄럽게 */
 /* progressive : 링(R 410)에서 바깥으로 갈수록 흐림이 세진다 */
 .pb1{ -webkit-backdrop-filter:blur(3px);  backdrop-filter:blur(3px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 404px, #000 420px); mask:radial-gradient(circle at 540px 540px, transparent 404px, #000 420px); }
@@ -284,8 +291,8 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 }
 .stage > *{ margin:0; text-align:center; color:#fff;
   /* 스트로크 링을 화면 안쪽(R 380)으로 옮기면서 글자도 레퍼런스(병원 인사 48px)에 맞춰 통째로 줄인다 : 76 → 48.
-     zoom 이라 숫자 도트·번짐(em)·줄 간격이 비율 그대로 같이 줄어든다 */
-  zoom:.632; }
+     zoom 이라 숫자 도트·번짐(em)·줄 간격이 비율 그대로 같이 줄어든다 (병원 로봇 문장과 같은 36px) */
+  zoom:.474; }   /* 병원 로봇과 같은 크기로 : 76 × .474 = 36px */
 
 /* 숫자 : 병원 로봇 길안내와 같은 5x7 도트 (폰트 대신 직접 그린다).
    숫자가 바뀔 때는 자리를 옮기지 않고 칸마다 불이 꺼지고 켜지며 한 칸씩 올라간다 */
@@ -299,16 +306,20 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 .meta    { font-size:52px; font-weight:400; line-height:1.5; }
 /* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍.
    색은 글자(.c)마다 입힌다 : 단어(.w)에 입히면 background-clip:text 가 아직 안 켜진 글자까지 그려 단어가 통째로 먼저 보인다 */
-.stage .c{ background:linear-gradient(180deg,#fff 0 66%,rgba(255,255,255,.55) 100%);
-           -webkit-background-clip:text; background-clip:text; color:transparent; }
+.stage .c{ background:linear-gradient(180deg,#fff 0 32%,#fcf9ea 52%,#e2f6fb 74%,rgba(186,232,246,.8) 100%);
+           -webkit-background-clip:text; background-clip:text; color:transparent;
+           padding:0 .08em; margin:0 -.08em; }   /* 흰빛 → 아주 옅은 노랑 → 옅은 청록 · Magnetik 의 T 처럼 상자 밖으로 나가는 글자가 잘리지 않게 */
 .stage em{ font-style:normal; font-weight:600; display:inline-block; }
-.stage em .c{ background:none; color:#fff; }
+.stage em .c{ background:none; color:#fffdf0; }
+.headline, .meta{ filter:drop-shadow(0 0 .18em rgba(160,222,242,.16)) drop-shadow(0 0 .34em rgba(255,236,172,.16)); }
+.glim::before{ color:#d9f5ff; }   /* 안쪽 겹 : 옅은 청록 */
+.glim::after { color:#ffe9a8; }   /* 바깥 번짐 : 아주 옅은 노랑 */
 /* 글리밍 : 같은 글자를 #FEFFF9 로 한 겹 더 얹고 오른쪽으로 갈수록 흐리게. 글자와 같은 시각에 함께 떠오른다
    blur 를 em 단위로 : 헬스장은 글자가 76px 이라 px 로 고정하면 번짐이 너무 작다 */
 .glim{ position:relative; }
 .glim::before, .glim::after{ content:attr(data-t); position:absolute; left:0; top:0;
   color:#FEFFF9; white-space:nowrap; pointer-events:none; text-align:left; opacity:0;
-  animation:glimWipe calc(var(--tn) * 1ms + 500ms) cubic-bezier(.3,.5,.4,1) both;
+  animation:glimWipe calc(var(--tn) * 1ms + 1300ms) cubic-bezier(.3,.5,.4,1) both;
   animation-delay:calc(var(--t0) * 1ms); }   /* 강조어의 첫 글자가 켜질 때 시작해 마지막 글자까지 훑는다 */
 /* 마스크 두 겹 : 오른쪽으로 갈수록 짙어지는 번짐 + 왼→오로 열리는 와이프 (교집합).
    글자가 왼쪽부터 나타나는 것과 같은 방향·같은 시각에 번짐이 따라온다 */
@@ -325,11 +336,16 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
           mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
 @keyframes glimWipe{
   from{ opacity:0; -webkit-mask-size:100% 100%, 0% 100%;   mask-size:100% 100%, 0% 100%;   }
-  12% { opacity:1; }
-  to  { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
+  8%  { opacity:1; }
+  65% { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
+  to  { opacity:.42; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }   /* 다 쓰이면 번짐을 줄여 읽히게 */
 }
 
 .w{ display:inline-block; }   /* 단어는 줄바꿈 묶음만. 보이기·애니메이션은 글자(.c)에서 */
+.stage .ln{ display:block; }
+/* 두 줄 문장 원칙(병원 로봇과 같다) : 첫 줄이 가운데에 먼저 쓰이고, 둘째 줄이 나오기 직전 반 줄 위로 */
+@keyframes lineUp{ from{ translate:0 .5lh; } to{ translate:0 0; } }
+.stage .two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms - 120ms); }
 
 /* ---------- 문장 등장 (병원 로봇과 같은 규칙) ----------
    문장 단위로 왼쪽부터 한 글자씩 흘러나오고, 가장 최근에 나타난 글자에 유리·비눗방울 같은 색 번짐.
@@ -356,6 +372,13 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 </head>
 <body class="idle bare">
 
+<nav class="jump" aria-label="장면 바로 가기">
+  <button type="button" data-go="0">대기 상태</button>
+  <button type="button" data-go="2">맥락 전달</button>
+  <button type="button" data-go="3">대화 시작</button>
+  <button type="button" data-go="9">운동 세트</button>
+  <button type="button" data-go="14">마무리</button>
+</nav>
 <button class="toggle" type="button" aria-pressed="true">
   <span class="sw"></span><span class="lb">제품 목업</span>
 </button>
@@ -405,7 +428,8 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 </div>
 
 <script>
-if (location.hash === '#screen') document.body.classList.add('bare','kiosk');
+if (location.hash === '#screen') document.body.classList.add('bare', 'kiosk', 'device');
+if (new URLSearchParams(location.search).has('rec')) document.body.classList.add('device', 'rec');   // ?rec=1 : 영상용 (버튼·썸네일 숨김)
 
 // scale() 은 단위 없는 수만 받으므로 JS로 계산
 const FILL = .92;
@@ -479,9 +503,9 @@ const split = el => {
 //  · 문장 끝(.?!…) 뒤 +450ms. 한 호흡 문장(hold1)은 쉬지 않는다
 //  · 일반 글자 번짐은 옅은 색, 강조어(em)는 짙은 색. 강조어에는 첫 글자 시각 --t0, 길이 --tn, 강조어 안 순서 --ei
 //  · inline span 이라 커닝이 끊기지 않는다
-const GLOW_EM   = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],    // 연두 · 파랑
-                   ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],    // 하늘 · 라벤더
-                   ['rgba(255,250,222,.95)', 'rgba(113,220,251,.75)']];  // 흰 핵 · 하늘
+const GLOW_EM   = [['rgba(255,244,196,.95)', 'rgba(140,212,250,.65)'],  // 옅은 노랑 · 하늘
+                   ['rgba(190,240,255,.95)', 'rgba(255,236,172,.6)'],    // 옅은 청록 · 옅은 노랑
+                   ['rgba(255,250,222,.95)', 'rgba(150,224,250,.6)']];   // 흰 핵 · 하늘 (파란끼만 쓰지 않는다)
 const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => (parseFloat(a) * .35).toFixed(2) + ')')));
 // 숫자 : 5x7 도트 (병원 로봇 길안내와 같은 글리프). 칸마다 원을 미리 깔고 켜진 칸만 불을 켠다
 const GLYPH = {
@@ -549,8 +573,16 @@ const letters = (el, t, hold1) => {
       w.append(c);
       t += STEP;
     });
-    if (wi < words.length - 1) t += STEP + (!hold1 && /[.?!…]$/.test(text) ? 450 : 0);
+    const next = words[wi + 1];
+    if (next) {
+      const lineBreak = next.closest('.ln') !== w.closest('.ln');
+      t += STEP + Math.max(!hold1 && /[.?!…]$/.test(text) ? 450 : 0, lineBreak ? 380 : 0);
+    }
   });
+  // 두 줄 : 둘째 줄 첫 글자 시각(--t2) — 그때 문장이 반 줄 위로 올라간다
+  const lns = el.querySelectorAll('.ln');
+  el.classList.toggle('two', lns.length > 1);
+  if (lns.length > 1) el.style.setProperty('--t2', lns[1].querySelector('.c')?.style.getPropertyValue('--t') ?? 0);
   el.querySelectorAll('em').forEach(em => {
     const cs = [...em.querySelectorAll('.c')];
     if (!cs.length) return;
@@ -576,7 +608,8 @@ const draw = s => {
       t = drawCount(el, +v, +total, t) + 380;   // 숫자가 다 올라간 뒤 문장이 이어진다
       continue;
     }
-    el.innerHTML = html;
+    // 두 줄 문장 : 줄마다 .ln 으로 묶어야 둘째 줄이 나올 때 함께 위로 올라간다
+    el.innerHTML = '<span class="ln">' + html.replaceAll('<br>', '</span><span class="ln">') + '</span>';
     split(el);
     // 카운터 → 문장 → 보조 문구 : 줄마다 한 박자(380ms) 쉬고 이어서 흘러나온다
     t = letters(el, t, s.hold1) + 380;
@@ -593,6 +626,8 @@ let idx = 0, timer;
 
 const field = document.querySelector('.field');
 const stroke = document.querySelector('.stroke');
+const sring = document.querySelector('.sring');
+let pbTimer;
 // 검은 원 : 링 안쪽을 또렷하게 자르며 보이스 UI 처럼 일렁인다. 반지름이 숨쉬고(396~405),
 // 둘레는 몇 개의 느린 물결(2·3·5번 굽이)이 서로 다른 속도로 흘러 정원이 아닌 살아 있는 고리가 된다.
 // 영상 속 링의 등장(0~0.75s)은 쓰지 않는다 : 등장은 CSS ringIn 이 가운데에서 부드럽게 키운다
@@ -638,13 +673,28 @@ const go = n => {
     s.look,
   ].filter(Boolean).join(' ');
   draw(s);
-  if (s.look === 'full') stroke.play().catch(() => {}); else { stroke.pause(); stroke.currentTime = RSTART; }
+  // 스트로크는 search 부터 미리 돌려 둔다 (보이지 않는 동안 디코딩을 마쳐 등장 첫 프레임이 끊기지 않게)
+  if (s.look === 'search') { stroke.currentTime = RSTART; sring.style.setProperty('--pb', 0); clearTimeout(pbTimer); }
+  if (s.look === 'search' || s.look === 'full') stroke.play().catch(() => {});
+  else { stroke.pause(); stroke.currentTime = RSTART; }
+  if (s.look === 'full' && SCENES[n - 1]?.look !== 'full') {   // 스트로크가 커지는 동안만
+    sring.style.setProperty('--pb', 0);
+    clearTimeout(pbTimer); pbTimer = setTimeout(() => sring.style.removeProperty('--pb'), 1700);
+  }
   if (s.hold) timer = setTimeout(() => go(n + 1), s.hold);
 };
 // 카메라가 없을 때의 수동 진행 : 한 단계씩, 마지막에서 리셋
 const tap = () => go(idx >= SCENES.length - 1 ? 0 : idx + 1);
 window.__go = go; window.__step = () => idx;
 
+const jump = document.querySelector('.jump');
+jump.addEventListener('pointerdown', e => e.stopPropagation());
+jump.addEventListener('click', e => { const k = e.target.dataset?.go; if (k) go(+k); });
+const JUMPS = [0, 2, 3, 9, 14];
+setInterval(() => {
+  const cur = [...JUMPS].reverse().find(n => idx >= n) ?? 0;
+  for (const b of jump.children) b.classList.toggle('on', +b.dataset.go === cur);
+}, 250);
 const toggle = document.querySelector('.toggle');
 toggle.addEventListener('pointerdown', e => e.stopPropagation());
 toggle.addEventListener('click', () => {
