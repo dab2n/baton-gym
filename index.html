@@ -34,6 +34,8 @@ body{
 .device, .device *{ letter-spacing:-0.02em; }
 
 /* 폰트 대체 : Magnetik 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
+/* 숫자 : 병원 로봇 길안내와 같은 OffBit Dot Bold (체험판이라 fonts/ 는 저장소에 올리지 않는다) */
+@font-face{ font-family:'OffBit Dot'; font-weight:700; src:local('OffBitTrial-DotBold'), local('OffBit Trial Dot Bold'), url('fonts/OffBitTrial-DotBold.woff') format('woff'); }
 @font-face{ font-family:'Pretendard Web'; font-weight:400; font-display:swap;
   src:local('Pretendard Regular'), local('Pretendard-Regular'), url('pretendard/Pretendard-Regular.subset.woff2') format('woff2'); }
 @font-face{ font-family:'Pretendard Web'; font-weight:500; font-display:swap;
@@ -221,6 +223,12 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
 @keyframes drift3{ to{ translate:206px 322px; rotate:18deg; scale:1.28; } }
 @keyframes drift4{ to{ translate:-134px 168px; scale:1.62; } }
 
+/* ---------- search : 엄지척 인식 뒤 별 모션 (병원 로봇과 같은 영상) ----------
+   검정 위에 얹으므로 screen : 영상의 검은 부분은 배경이 그대로 비친다 */
+.star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:2;
+       opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
+body.search .star{ opacity:1; }
+
 /* ---------- search : 베젤 바로 안쪽이 숨쉬듯 일렁인다 ---------- */
 .rim{
   position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none;
@@ -281,18 +289,45 @@ body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) bo
 /* 스트로크가 도는 동안은 영상만 : 위아래 색 띠와 가장자리 발광을 끈다 */
 body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacity:0; }
 
+/* ---------- 운동 화면 (피그마 3590:7370) : 위 라벨 · 가운데 숫자 · 아래 라벨 ----------
+   숫자는 병원 로봇과 같은 OffBit Dot Bold. 옅은 숫자가 아래에서 위로 흰색으로 차오르는 것이 곧 게이지다
+   (랫풀다운 : 끝까지 당기면 다 차고 다음 숫자로) */
+.gym{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .45s ease; z-index:1; }
+.gym.on{ opacity:1; }
+.glab{ position:absolute; left:0; right:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }
+.gtop{ top:148px; color:rgba(255,255,255,.9); }
+.gbot{ top:904px; color:#fff; }
+.gnum{ position:absolute; left:0; right:0; top:50%; translate:0 -50%; height:263px;
+       font-family:'OffBit Dot', monospace; font-weight:700; font-size:283px; line-height:263px; text-align:center; }
+.gnum span{ position:absolute; inset:0; color:rgba(255,255,255,.22); }
+.gnum .fillz{ color:#fff; clip-path:inset(calc(100% - var(--fill, 0) * 100%) 0 0 0); }   /* 아래에서 위로 채워진다 */
+/* 시작 전 카운트다운 : 스트로크와 같은 빛의 고리가 줄어들고, 숫자는 도트가 빠르게 옮겨 다니며 바뀐다 */
+.gring{ position:absolute; inset:0; width:1080px; height:1080px; opacity:0; transition:opacity .5s ease;
+        filter:blur(9px) drop-shadow(0 0 22px rgba(190,235,250,.35)); animation:ringWob 4.3s ease-in-out infinite; }
+.gym.cd .gring{ opacity:.9; }
+.gring circle{ fill:none; stroke:#eaf7ff; stroke-width:16; stroke-linecap:round;
+               transform:rotate(-90deg); transform-origin:540px 540px; transition:stroke-dashoffset .96s linear; }
+.gdots{ position:absolute; inset:0; width:1080px; height:1080px; }
+.gdots circle{ fill:#fff; transition:cx .22s cubic-bezier(.3,0,.2,1), cy .22s cubic-bezier(.3,0,.2,1), opacity .18s ease; }
+/* 피드백 : 아래쪽에서 번지는 빛과 함께 조언이 떠올랐다가, 자세가 돌아오면 사라진다 */
+.gfb{ position:absolute; left:-10%; right:-10%; bottom:-14%; height:46%; opacity:0; transition:opacity .9s ease; }
+.gfb::before, .gfb::after{ content:''; position:absolute; inset:0; }
+.gfb::before{ background:radial-gradient(60% 70% at 46% 100%, rgba(36,76,180,.75), rgba(36,76,180,0) 70%); filter:blur(40px); }
+.gfb::after { background:radial-gradient(42% 60% at 72% 96%, rgba(198,164,74,.5), rgba(198,164,74,0) 70%); filter:blur(46px); }
+.gym.fb .gfb{ opacity:1; }
+
 /* ---------- 본문 : 한 장면 = 카운터 + 문장 + 부가정보 ---------- */
 /* flex 로 세로 중앙 정렬 — 줄 수·구성이 달라도 항상 스크린 정중앙 */
 .stage{
   /* .rim(z1) 보다 뒤 DOM 이라 z-index 없이도 위에 온다 */
   position:absolute; inset:0;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:22px; padding:0 130px; pointer-events:none;
+  gap:26px; padding:0 100px; pointer-events:none;
 }
 .stage > *{ margin:0; text-align:center; color:#fff;
   /* 스트로크 링을 화면 안쪽(R 380)으로 옮기면서 글자도 레퍼런스(병원 인사 48px)에 맞춰 통째로 줄인다 : 76 → 48.
      zoom 이라 숫자 도트·번짐(em)·줄 간격이 비율 그대로 같이 줄어든다 (병원 로봇 문장과 같은 36px) */
-  zoom:.474; }   /* 병원 로봇과 같은 크기로 : 76 × .474 = 36px */
+  zoom:1; }   /* 스크린이 작아 병원보다 크게 : 피그마(헬스장) 기준 문장 80px · 부가정보 44px */
 
 /* 숫자 : 병원 로봇 길안내와 같은 5x7 도트 (폰트 대신 직접 그린다).
    숫자가 바뀔 때는 자리를 옮기지 않고 칸마다 불이 꺼지고 켜지며 한 칸씩 올라간다 */
@@ -302,8 +337,8 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 .countdots circle.on{ opacity:1; }
 .countdots .dim circle.on{ opacity:.42; }   /* "/10" 쪽 */
 @keyframes countIn{ from{ opacity:0; } to{ opacity:1; } }
-.headline{ font-size:76px; font-weight:500; line-height:1.45; }
-.meta    { font-size:52px; font-weight:400; line-height:1.5; }
+.headline{ font-size:80px; font-weight:500; line-height:1.4; max-width:660px; }   /* 피그마 : 660 에서 줄이 넘어간다 */
+.meta    { font-size:44px; font-weight:400; line-height:1.4; color:rgba(255,255,255,.8); }
 /* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍.
    색은 글자(.c)마다 입힌다 : 단어(.w)에 입히면 background-clip:text 가 아직 안 켜진 글자까지 그려 단어가 통째로 먼저 보인다 */
 .stage .c{ background:linear-gradient(180deg,#fff 0 32%,#fcf9ea 52%,#e2f6fb 74%,rgba(186,232,246,.8) 100%);
@@ -402,6 +437,11 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
     <svg class="cyan" viewBox="0 0 1116 828" aria-hidden="true">
       <path fill="#8AFFF3" d="M916 401.141C916 493.216 717.924 628 569.426 628C420.927 628 200 353.907 200 261.832C200 169.756 393.505 207.78 542.004 207.78C690.503 207.78 916 309.065 916 401.141Z"/>
     </svg>
+    <!-- 엄지척 인식 모션 : 병원 로봇과 같은 영상 -->
+    <video class="star" muted playsinline preload="auto" aria-hidden="true">
+      <source src="star.webm?v=7" type="video/webm">
+      <source src="star.mp4?v=7"  type="video/mp4">
+    </video>
     <div class="rim"></div>
     <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
          세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
@@ -416,6 +456,14 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
       <div class="sdisc"><i></i></div>
     </div>
 
+    <div class="gym" aria-hidden="true">
+      <div class="gfb"></div>
+      <svg class="gring" viewBox="0 0 1080 1080"><circle cx="540" cy="540" r="446"/></svg>
+      <svg class="gdots" viewBox="0 0 1080 1080"></svg>
+      <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
+      <p class="glab gtop"></p>
+      <p class="glab gbot"></p>
+    </div>
     <div class="stage"></div>
 
     <!-- 카메라 노치 : .screen 안에 두어 같은 clip-path 로 잘리게 한다. 베젤은 그리지 않는다 -->
@@ -448,25 +496,16 @@ const SCENES = [
   { look:'idle',   hold:0 },                                                   // 얼굴 대기
   { look:'fill',   hold:0, delay:1750,                             // 01a 엄지척 대기
     text:'Hello, shall we start your workout?' },
-  { look:'search', hold:4200 },                                                // 01a 컨텍스트 수신
-  { look:'full',   hold:4300, delay:1500, hold1:true,               // 01b
-    text:'Welcome back, <em>Leo.</em>' },
-  { look:'full',   hold:5600, // 01c
-    text:'Today&rsquo;s context', meta:'Shoulder · Mild discomfort<br>Upper body' },
-  { look:'full',   hold:3800, hold1:true, text:'Analyzing…' },       // 02a
-  { look:'full',   hold:5600, hold1:true,                           // 02b
-    text:'<em>Shoulder-friendly</em> mode', meta:'Level 03 · Light' },
-  { look:'full',   hold:5000, hold1:true,                           // 02c
-    text:'Adjusting for you.', meta:'Level 03 &rarr; <em>Level 02</em>' },
-  { look:'full',   hold:4200, hold1:true, text:'You&rsquo;re all set.' },   // 02d
-  { look:'full',   hold:4600, hold1:true,                           // 03a
-    text:'Ready?', meta:'<em>10</em> REPS' },
-  { look:'full',   hold:4000, count:'3<u>/10</u>',  text:'Keep going.' },        // 03b
-  { look:'full',   hold:4000, count:'4<u>/10</u>',  text:'Pull slowly.' },       // 03c
-  { look:'full',   hold:4600, count:'5<u>/10</u>',                               // 03d
-    text:'Resistance adjusted.', meta:'Level 02' },
-  { look:'full',   hold:4600, count:'10<u>/10</u>',                              // 03e
-    text:'Set complete.', meta:'Take a rest.' },
+  { look:'search', hold:5200 },                                                // 맥락 전달 (엄지척 인식 → 별 모션)
+  { look:'full',   hold:5600, delay:1200,
+    text:'You had a medical appointment today.' },
+  { look:'full',   hold:4800, hold1:true,
+    text:'I&rsquo;ll go easy on your shoulder.' },
+  { look:'full',   hold:4600, hold1:true,
+    text:'Are you ready?', meta:'Neutral Grip · 10 Reps · 3 Sets' },
+  { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
+  { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
+    top:'Neutral Grip', bottom:'Set 1', feedbackAt:4, feedback:'Pull Slowly..' },
   { look:'full',   hold:5000, hold1:true,                                        // 05a
     text:'Workout complete.', meta:'<em>30</em> REPS · <em>3</em> SETS' },
   { look:'full',   hold:5600, // 05b
@@ -593,8 +632,95 @@ const letters = (el, t, hold1) => {
   return t;
 };
 
+
+// ---------- 운동 화면 : 카운트다운 · 카운팅 · 피드백 (피그마 3590:7370) ----------
+const gym = document.querySelector('.gym');
+const gTop = gym.querySelector('.gtop'), gBot = gym.querySelector('.gbot');
+const gPale = gym.querySelector('.pale'), gFill = gym.querySelector('.fillz');
+const gNum = gym.querySelector('.gnum');
+const gRing = gym.querySelector('.gring circle'), gDots = gym.querySelector('.gdots');
+const RC = 2 * Math.PI * 446;
+gRing.setAttribute('stroke-dasharray', RC);
+
+// 라벨도 문장과 같은 규칙으로 한 글자씩 (병원 로봇과 통일)
+const gLabel = (el, text, delay = 0) => {
+  if (el.dataset.t === text) return;
+  el.dataset.t = text;
+  el.innerHTML = '<span class="ln">' + text + '</span>';
+  split(el); letters(el, delay, true);
+};
+
+// 도트 숫자 : 5x7 칸(37px)을 도트로. 숫자가 바뀌면 도트들이 제자리를 찾아 빠르게 옮겨 간다
+const DCELL = 37, DOTR = 13.5;   // 카운트다운 도트 : 칸 37px · 반지름 13.5
+const dotsOf = ch => {
+  const out = [];
+  GLYPH[ch].split(',').forEach((row, r) => [...row].forEach((b, c) => {
+    if (b === '1') out.push([540 + (c - 2) * DCELL, 540 + (r - 3) * DCELL]);
+  }));
+  return out;
+};
+const dotPool = [...Array(24)].map(() => {
+  const c = document.createElementNS(NS, 'circle');
+  c.setAttribute('r', DOTR); c.setAttribute('cx', 540); c.setAttribute('cy', 540);
+  c.style.opacity = 0; gDots.append(c); return c;
+});
+const showDots = ch => {
+  const pts = dotsOf(ch);
+  dotPool.forEach((c, i) => {
+    if (i < pts.length) { c.setAttribute('cx', pts[i][0]); c.setAttribute('cy', pts[i][1]); c.style.opacity = 1; }
+    else c.style.opacity = 0;
+  });
+};
+
+let gymRAF, gymTimer;
+const gymStop = () => { clearTimeout(gymTimer); cancelAnimationFrame(gymRAF); gym.className = 'gym'; };
+
+// 시작 전 3 · 2 · 1 : 고리가 한 칸씩 줄고 도트가 다음 숫자로 옮겨 간다
+const runCountdown = n => {
+  gym.className = 'gym on cd';
+  gPale.textContent = gFill.textContent = '';
+  gDots.style.display = '';
+  let k = 3;
+  const tick = () => {
+    showDots(String(k));
+    gRing.style.strokeDashoffset = RC * (1 - k / 3);
+    if (k-- > 1) gymTimer = setTimeout(tick, 1000);
+    else gymTimer = setTimeout(() => go(n + 1), 900);
+  };
+  tick();
+};
+
+// 카운팅 : 1 부터. 당길수록 옅은 숫자가 아래에서 위로 흰색으로 차고, 다 차면 다음 숫자로
+const runReps = (s, n) => {
+  gym.className = 'gym on';
+  gDots.style.display = 'none';
+  gLabel(gTop, s.top, 200); gLabel(gBot, s.bottom, 500);
+  let rep = 1;
+  const show = () => { gPale.textContent = gFill.textContent = String(rep); };
+  const pull = () => {
+    show();
+    const t0 = performance.now(), PULL = 1500, HOLD = 420;   // 천천히 당겼다가 잠깐 버틴다
+    if (rep === s.feedbackAt) { gym.classList.add('fb'); gLabel(gBot, s.feedback, 150); }
+    const step = () => {
+      const t = performance.now() - t0;
+      const e = Math.min(1, t / PULL), k = e * e * (3 - 2 * e);
+      gNum.style.setProperty('--fill', k.toFixed(3));
+      if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
+      if (rep === s.feedbackAt + 1) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다
+      if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1), 900); return; }
+      gNum.style.setProperty('--fill', 0);
+      gymTimer = setTimeout(pull, 260);
+    };
+    step();
+  };
+  pull();
+};
+
 const draw = s => {
   stage.replaceChildren();
+  gymStop();
+  if (s.mode === 'countdown') return runCountdown(idx);
+  if (s.mode === 'reps') return runReps(s, idx);
   let t = s.delay ?? 200;
   clearTimeout(countWait); clearInterval(countRoll);
   if (!s.count) lastCount = 0;   // 세트가 끝나면 다음 세트는 0 부터 센다
@@ -626,6 +752,7 @@ let idx = 0, timer;
 
 const field = document.querySelector('.field');
 const stroke = document.querySelector('.stroke');
+const star = document.querySelector('.star');
 const sring = document.querySelector('.sring');
 let pbTimer;
 // 검은 원 : 링 안쪽을 또렷하게 자르며 보이스 UI 처럼 일렁인다. 반지름이 숨쉬고(396~405),
@@ -673,6 +800,7 @@ const go = n => {
     s.look,
   ].filter(Boolean).join(' ');
   draw(s);
+  if (s.look === 'search') { star.currentTime = 0; star.play().catch(() => {}); } else star.pause();
   // 스트로크는 search 부터 미리 돌려 둔다 (보이지 않는 동안 디코딩을 마쳐 등장 첫 프레임이 끊기지 않게)
   if (s.look === 'search') { stroke.currentTime = RSTART; sring.style.setProperty('--pb', 0); clearTimeout(pbTimer); }
   if (s.look === 'search' || s.look === 'full') stroke.play().catch(() => {});
