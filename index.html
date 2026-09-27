@@ -312,7 +312,7 @@ body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
 .gbot{ top:904px; color:#fff; }
 .gnum.flick{ animation:numFlick .26s cubic-bezier(.3,0,.2,1); }
 @keyframes numFlick{ 0%{ filter:blur(7px); scale:1.08; } 60%{ filter:blur(0); scale:1; } 100%{ filter:blur(0); scale:1; } }
-.gnum{ position:absolute; left:0; right:0; top:50%; translate:0 -50%; transition:translate .12s ease; height:263px;
+.gnum{ position:absolute; left:0; right:0; top:50%; translate:0 -50%; transition:translate .12s ease; letter-spacing:0; height:263px;
        font-family:'OffBit Dot', monospace; font-weight:700; font-size:283px; line-height:263px; text-align:center; }
 .gnum span{ position:absolute; inset:0; color:rgba(255,255,255,.22); }
 /* 아래에서 위로 채워진다 : 경계를 부드럽게 (도트가 한 칸씩 뚝 켜지지 않게) */
@@ -649,7 +649,9 @@ const inkCx = document.createElement('canvas').getContext('2d');
 const centerNum = ch => {
   inkCx.font = "700 283px 'OffBit Dot', monospace";
   const m = inkCx.measureText(ch);
-  const shift = (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 - m.actualBoundingBoxRight;
+  // 가운데 정렬은 글자 상자(advance) 기준이라 먹물이 한쪽으로 쏠린다 : 먹물 가운데가 화면 가운데에 오도록 되돌린다
+  const ls = parseFloat(getComputedStyle(gNum).letterSpacing) || 0;   // 자간은 글자 뒤에도 붙어 가운데를 밀어낸다
+  const shift = m.width / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 + ls / 2 - 2.5;   // -2.5 : 캔버스 계산과 실제 렌더링의 차이(실측)
   gNum.style.translate = `${shift.toFixed(1)}px -50%`;
 };
 
