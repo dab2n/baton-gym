@@ -141,6 +141,10 @@ body.bye .blur39{ filter:blur(30px); }
 body.bye .screen::before, body.bye .screen::after{ opacity:0; transition:none; }
 body.bye .bandc{ opacity:.85; }
 body.bye .rimlight{ opacity:.35; }
+/* 마지막 화면(카운팅)은 서서히 걷히고, 인사도 다 쓰인 뒤(3.2s) 옅어진 다음 대기 상태로 */
+body.bye .gym{ transition-duration:.9s; }
+body.bye .headline{ animation:byeOut .8s ease 3.2s both; }
+@keyframes byeOut{ to{ opacity:0; } }
 body.eraseb .screen::before, body.eraseb .screen::after{ opacity:0; transition:none; }
 body.eraseb .rimlight{ opacity:0; transition:opacity 1.2s ease; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
