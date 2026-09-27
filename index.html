@@ -26,13 +26,20 @@ html,body{ height:100%; margin:0; overflow:hidden; background:#0B0F18; }
 html:has(.shot), html:has(.shot) body{ background:transparent; }   /* ?s=N : 배경색 없이 UI 만 */
 body{
   display:flex; align-items:center; justify-content:center;
-  font-family:var(--ff-en,'Magnetik'), 'Pretendard Web', system-ui, sans-serif;
+  font-family:var(--ff-en,'Magnetik'), var(--ff-ko,'SF Pro KR'), 'Pretendard Web', system-ui, sans-serif;
   -webkit-font-smoothing:antialiased;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
 }
 /* 자간 : Magnetik 은 -2% (letter-spacing 은 계산된 px 로 상속돼서 요소마다 em 을 다시 풀어준다) */
 .device, .device *{ letter-spacing:-0.02em; }
 
+/* 한글 : 병원 로봇과 같은 SF Pro KR (한글 구간만) */
+@font-face{ font-family:'SF Pro KR'; font-weight:600; font-display:block;
+  src:url('fonts/SFProKR-Semibold.otf') format('opentype');
+  unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
+@font-face{ font-family:'SF Pro KR'; font-weight:700; font-display:block;
+  src:url('fonts/SFProKR-Bold.otf') format('opentype');
+  unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
 /* 숫자용 : 병원 길안내와 같은 OffBit Dot Bold (도트를 뽑아 쓰므로 모양이 곧 폰트다) */
 @font-face{ font-family:'OffBit Dot'; font-weight:700; src:local('OffBitTrial-DotBold'), local('OffBit Trial Dot Bold'), url('fonts/OffBitTrial-DotBold.woff') format('woff'); }
 /* 폰트 대체 : Magnetik 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
@@ -135,7 +142,10 @@ body.cd .screen, body.reps .screen{ background:linear-gradient(180deg, #0F1627 9
 @keyframes rimOrbit{ to{ rotate:360deg; } }
 /* 얼굴 근접 : 띠는 캔버스(.bandc)가 12시부터 한 바퀴 그리며 나타난다 (병원과 같다) */
 body.fill .screen::before, body.fill .screen::after{ opacity:0; transition:none; }
-body.fill .rimlight{ opacity:.35; }
+/* 맥락 전달(별 모션) 동안은 영상만 : 위아래 색과 가장자리 발광을 끈다 (병원 connecting 과 같다) */
+body.search .screen::before, body.search .screen::after, body.search .rimlight{ opacity:0; }
+@keyframes rimIn{ 0%, 15%{ opacity:0; } 100%{ opacity:.35; } }
+body.fill .rimlight{ opacity:.35; animation:rimIn 2s both, rimOrbit 18s linear infinite; }
 .bandc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; }
 body.fill .bandc{ opacity:.85; }
 .bandc.on{ opacity:.85; }
@@ -147,7 +157,7 @@ body.bye .bandc{ opacity:.85; }
 body.bye .rimlight{ opacity:.35; }
 /* 마지막 화면(카운팅)은 서서히 걷히고, 인사도 다 쓰인 뒤(3.2s) 옅어진 다음 대기 상태로 */
 body.bye .gym{ transition-duration:.9s; }
-body.bye .headline{ animation:byeOut .8s ease 3.2s both; }
+body.bye .headline{ animation:byeOut .6s ease 3.4s both; }   /* 병원과 같은 시각 */
 @keyframes byeOut{ to{ opacity:0; } }
 body.eraseb .screen::before, body.eraseb .screen::after{ opacity:0; transition:none; }
 body.eraseb .rimlight{ opacity:0; transition:opacity 1.2s ease; }
@@ -553,7 +563,7 @@ const SCENES = [
   { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
   { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
     top:'Neutral Grip', bottom:'Set 1', feedbackAt:4, feedback:'Pull Slowly..' },
-  { look:'bye',    hold:4600, delay:900, hold1:true,                          // 마무리 인사 → 띠를 지우며 대기 상태로
+  { look:'bye',    hold:4200, delay:1000, hold1:true, rate:1.4,                // 마무리 인사 → 띠를 지우며 대기 상태로 (병원과 같은 속도·시각)
     text:'Nice set, Leo!' },
 ];
 
@@ -640,7 +650,7 @@ const drawCount = (el, to, total, start) => {
 };
 
 const STEP = 30;
-const letters = (el, t, hold1) => {
+const letters = (el, t, hold1, rate = 1) => {
   const words = [...el.querySelectorAll('.w')];
   words.forEach((w, wi) => {
     const text = w.textContent; w.textContent = '';
@@ -652,13 +662,13 @@ const letters = (el, t, hold1) => {
       const [g1, g2] = (em ? GLOW_EM : GLOW_SOFT)[(wi + j) % 3];
       c.style.setProperty('--g1', g1); c.style.setProperty('--g2', g2);
       w.append(c);
-      t += STEP;
+      t += STEP * rate;
     });
     const next = words[wi + 1];
     if (next) {
       const lineBreak = next.closest('.ln') !== w.closest('.ln');
       const endsSentence = /[.?!…]$/.test(text);
-      t += STEP + (!hold1 && endsSentence ? 450 : 0) + (lineBreak && endsSentence ? 380 : 0);   // 한 문장이 두 줄로 넘어갈 땐 쉬지 않는다
+      t += (STEP + (!hold1 && endsSentence ? 450 : 0) + (lineBreak && endsSentence ? 380 : 0)) * rate;   // 한 문장이 두 줄로 넘어갈 땐 쉬지 않는다
     }
   });
   // 두 줄 : 둘째 줄 첫 글자 시각(--t2) — 그때 문장이 반 줄 위로 올라간다
@@ -856,7 +866,7 @@ const draw = s => {
     el.innerHTML = '<span class="ln">' + html.replaceAll('<br>', '</span><span class="ln">') + '</span>';
     split(el);
     // 카운터 → 문장 → 보조 문구 : 줄마다 한 박자(380ms) 쉬고 이어서 흘러나온다
-    t = letters(el, t, s.hold1) + 380;
+    t = letters(el, t, s.hold1, s.rate) + 380;
   }
   // 강조어(em)에 글리밍 겹 한 장 (시각은 letters 가 준 --t0 · --tn)
   for (const em of stage.querySelectorAll('em')) {
