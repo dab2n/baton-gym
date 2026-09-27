@@ -236,9 +236,7 @@ body.search .star{ opacity:1; }
   box-shadow:inset 0 0 52px 8px rgba(254,255,249,.28);
 }
 /* full 로 넘어가도 애니메이션은 계속 돌린다 (끊긴 느낌 방지). 사라지는 건 opacity 만 */
-body.search .rim,
 body.full   .rim{ animation:breathe 3.4s ease-in-out infinite; }
-body.search .rim{ opacity:1; }
 @keyframes breathe{
   0%,100%{ box-shadow:inset 0 0 44px  4px rgba(254,255,249,.2); }
   50%    { box-shadow:inset 0 0 104px 30px rgba(254,255,249,.45); }
@@ -248,9 +246,7 @@ body.search .rim{ opacity:1; }
   background:radial-gradient(circle at 50% 3%, rgba(254,255,249,.3), transparent 44%);
   filter:blur(44px); transition:opacity 1s ease;
 }
-body.search .rim::after,
 body.full   .rim::after{ animation:orbit 11s linear infinite; }
-body.search .rim::after{ opacity:1; }
 @keyframes orbit{ to{ rotate:360deg; } }
 
 /* ---------- 문구 장면 : 병원 로봇(dab2n/baton)과 같은 스트로크 링 ----------
@@ -285,7 +281,8 @@ body.search .rim::after{ opacity:1; }
          -webkit-mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
                  mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
          pointer-events:none; }
-body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) both; }
+/* 디자인(피그마 3590:7370)에는 문장·카운팅 화면에 스트로크 링이 없다 : 켜지 않는다 (카운트다운 고리 .gring 만) */
+/* body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) both; } */
 /* 스트로크가 도는 동안은 영상만 : 위아래 색 띠와 가장자리 발광을 끈다 */
 body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacity:0; }
 
@@ -297,18 +294,21 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 .glab{ position:absolute; left:0; right:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }
 .gtop{ top:148px; color:rgba(255,255,255,.9); }
 .gbot{ top:904px; color:#fff; }
+.gnum.flick{ animation:numFlick .26s cubic-bezier(.3,0,.2,1); }
+@keyframes numFlick{ 0%{ filter:blur(7px); scale:1.08; } 60%{ filter:blur(0); scale:1; } 100%{ filter:blur(0); scale:1; } }
 .gnum{ position:absolute; left:0; right:0; top:50%; translate:0 -50%; height:263px;
        font-family:'OffBit Dot', monospace; font-weight:700; font-size:283px; line-height:263px; text-align:center; }
 .gnum span{ position:absolute; inset:0; color:rgba(255,255,255,.22); }
-.gnum .fillz{ color:#fff; clip-path:inset(calc(100% - var(--fill, 0) * 100%) 0 0 0); }   /* 아래에서 위로 채워진다 */
+/* 아래에서 위로 채워진다 : 경계를 부드럽게 (도트가 한 칸씩 뚝 켜지지 않게) */
+.gnum .fillz{ color:#fff;
+  -webkit-mask-image:linear-gradient(0deg, #000 0, #000 calc(var(--fill, 0) * 100%), rgba(0,0,0,.45) calc(var(--fill, 0) * 100% + 9%), transparent calc(var(--fill, 0) * 100% + 20%));
+          mask-image:linear-gradient(0deg, #000 0, #000 calc(var(--fill, 0) * 100%), rgba(0,0,0,.45) calc(var(--fill, 0) * 100% + 9%), transparent calc(var(--fill, 0) * 100% + 20%)); }
 /* 시작 전 카운트다운 : 스트로크와 같은 빛의 고리가 줄어들고, 숫자는 도트가 빠르게 옮겨 다니며 바뀐다 */
 .gring{ position:absolute; inset:0; width:1080px; height:1080px; opacity:0; transition:opacity .5s ease;
         filter:blur(9px) drop-shadow(0 0 22px rgba(190,235,250,.35)); animation:ringWob 4.3s ease-in-out infinite; }
 .gym.cd .gring{ opacity:.9; }
 .gring circle{ fill:none; stroke:#eaf7ff; stroke-width:16; stroke-linecap:round;
                transform:rotate(-90deg); transform-origin:540px 540px; transition:stroke-dashoffset .96s linear; }
-.gdots{ position:absolute; inset:0; width:1080px; height:1080px; }
-.gdots circle{ fill:#fff; transition:cx .22s cubic-bezier(.3,0,.2,1), cy .22s cubic-bezier(.3,0,.2,1), opacity .18s ease; }
 /* 피드백 : 아래쪽에서 번지는 빛과 함께 조언이 떠올랐다가, 자세가 돌아오면 사라진다 */
 .gfb{ position:absolute; left:-10%; right:-10%; bottom:-14%; height:46%; opacity:0; transition:opacity .9s ease; }
 .gfb::before, .gfb::after{ content:''; position:absolute; inset:0; }
@@ -337,8 +337,9 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 .countdots circle.on{ opacity:1; }
 .countdots .dim circle.on{ opacity:.42; }   /* "/10" 쪽 */
 @keyframes countIn{ from{ opacity:0; } to{ opacity:1; } }
-.headline{ font-size:80px; font-weight:500; line-height:1.4; max-width:660px; }   /* 피그마 : 660 에서 줄이 넘어간다 */
+.headline{ font-size:80px; font-weight:500; line-height:1.4; }   /* 피그마 3590:7370 · 줄바꿈은 문구에 직접 준다 */
 .meta    { font-size:44px; font-weight:400; line-height:1.4; color:rgba(255,255,255,.8); }
+.headline.small{ font-size:56px; }
 /* 글자는 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다. 강조어는 흰색 그대로 + 글리밍.
    색은 글자(.c)마다 입힌다 : 단어(.w)에 입히면 background-clip:text 가 아직 안 켜진 글자까지 그려 단어가 통째로 먼저 보인다 */
 .stage .c{ background:linear-gradient(180deg,#fff 0 32%,#fcf9ea 52%,#e2f6fb 74%,rgba(186,232,246,.8) 100%);
@@ -363,10 +364,10 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
   -webkit-mask-position:0 0, 0 0;  mask-position:0 0, 0 0;
   -webkit-mask-size:100% 100%, 140% 100%;  mask-size:100% 100%, 140% 100%;
   -webkit-mask-composite:source-in;        mask-composite:intersect; }
-.glim::before{ filter:blur(.025em);
+.glim::before{ filter:blur(1px);
   -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 22%), linear-gradient(90deg,#000 0 68%, transparent 100%);
           mask-image:linear-gradient(90deg,transparent 0%,#000 22%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
-.glim::after { filter:blur(.05em);
+.glim::after { filter:blur(2px);
   -webkit-mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%);
           mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
 @keyframes glimWipe{
@@ -386,14 +387,14 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
    문장 단위로 왼쪽부터 한 글자씩 흘러나오고, 가장 최근에 나타난 글자에 유리·비눗방울 같은 색 번짐.
    색은 엄지척 구에서 : 흰 핵 · 연두 · 파랑 · 하늘 (글자마다 두 색 짝 --g1/--g2). 일반 글자는 옅게, 강조어는 짙게.
    강조어는 켜진 뒤에도 번짐이 글자를 따라 물결처럼 일렁인다. 번짐·흐림 크기는 em 단위 (글자가 52~240px 로 제각각) */
-@keyframes letterIn{
-  0%   { opacity:0; filter:blur(.05em) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
-  38%  { opacity:1; filter:blur(0)     drop-shadow(0 0 .09em var(--g1)) drop-shadow(0 0 .22em var(--g2)); }
-  100% { opacity:1; filter:blur(0)     drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+@keyframes letterIn{   /* 병원 로봇과 같은 값(px) : em 으로 주면 글자가 커질수록 번짐이 과해 끊겨 보인다 */
+  0%   { opacity:0; filter:blur(2px) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  38%  { opacity:1; filter:blur(0)   drop-shadow(0 0 3.5px var(--g1)) drop-shadow(0 0 8.5px var(--g2)); }
+  100% { opacity:1; filter:blur(0)   drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
 @keyframes emGlow{
-  from{ filter:blur(0) drop-shadow(0 0 .012em var(--g1)) drop-shadow(0 0 .03em var(--g2)); }
-  to  { filter:blur(0) drop-shadow(0 0 .04em var(--g1))  drop-shadow(0 0 .1em var(--g2)); }   /* 가장자리만 얇게 일렁인다 */
+  from{ filter:blur(0) drop-shadow(0 0 .4px var(--g1)) drop-shadow(0 0 1px var(--g2)); }
+  to  { filter:blur(0) drop-shadow(0 0 1.1px var(--g1)) drop-shadow(0 0 2.6px var(--g2)); }   /* 가장자리만 얇게 (병원과 같은 값) */
 }
 .stage .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms); }
 .stage em .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
@@ -459,7 +460,6 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
     <div class="gym" aria-hidden="true">
       <div class="gfb"></div>
       <svg class="gring" viewBox="0 0 1080 1080"><circle cx="540" cy="540" r="446"/></svg>
-      <svg class="gdots" viewBox="0 0 1080 1080"></svg>
       <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
       <p class="glab gtop"></p>
       <p class="glab gbot"></p>
@@ -494,25 +494,18 @@ fit();
    hold1 : 한 호흡으로 읽히는 짧은 문장 — 문장부호에서 쉬지 않는다             */
 const SCENES = [
   { look:'idle',   hold:0 },                                                   // 얼굴 대기
-  { look:'fill',   hold:0, delay:1750,                             // 01a 엄지척 대기
-    text:'Hello, shall we start your workout?' },
+  { look:'fill',   hold:0, delay:1750, cls:'small',                // 01a 엄지척 대기 (디자인 밖 문구라 작게)
+    text:'Hello, shall we start<br>your workout?' },
   { look:'search', hold:5200 },                                                // 맥락 전달 (엄지척 인식 → 별 모션)
   { look:'full',   hold:5600, delay:1200,
-    text:'You had a medical appointment today.' },
+    text:'You had a medical<br>appointment today.' },
   { look:'full',   hold:4800, hold1:true,
-    text:'I&rsquo;ll go easy on your shoulder.' },
+    text:'I&rsquo;ll go easy<br>on your shoulder.' },
   { look:'full',   hold:4600, hold1:true,
     text:'Are you ready?', meta:'Neutral Grip · 10 Reps · 3 Sets' },
   { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
   { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
     top:'Neutral Grip', bottom:'Set 1', feedbackAt:4, feedback:'Pull Slowly..' },
-  { look:'full',   hold:5000, hold1:true,                                        // 05a
-    text:'Workout complete.', meta:'<em>30</em> REPS · <em>3</em> SETS' },
-  { look:'full',   hold:5600, // 05b
-    text:'Today&rsquo;s workout', meta:'Upper body · Level 03<br>30 reps · 3 sets' },
-  { look:'full',   hold:5000, hold1:true,                                        // 05c
-    text:'Workout saved.', meta:'Ready for your next session.' },
-  { look:'full',   hold:0, hold1:true, text:'Goodbye, <em>Leo.</em>' },         // 05d
 ];
 
 const stage = document.querySelector('.stage');
@@ -638,7 +631,7 @@ const gym = document.querySelector('.gym');
 const gTop = gym.querySelector('.gtop'), gBot = gym.querySelector('.gbot');
 const gPale = gym.querySelector('.pale'), gFill = gym.querySelector('.fillz');
 const gNum = gym.querySelector('.gnum');
-const gRing = gym.querySelector('.gring circle'), gDots = gym.querySelector('.gdots');
+const gRing = gym.querySelector('.gring circle');
 const RC = 2 * Math.PI * 446;
 gRing.setAttribute('stroke-dasharray', RC);
 
@@ -650,42 +643,20 @@ const gLabel = (el, text, delay = 0) => {
   split(el); letters(el, delay, true);
 };
 
-// 도트 숫자 : 5x7 칸(37px)을 도트로. 숫자가 바뀌면 도트들이 제자리를 찾아 빠르게 옮겨 간다
-const DCELL = 37, DOTR = 13.5;   // 카운트다운 도트 : 칸 37px · 반지름 13.5
-const dotsOf = ch => {
-  const out = [];
-  GLYPH[ch].split(',').forEach((row, r) => [...row].forEach((b, c) => {
-    if (b === '1') out.push([540 + (c - 2) * DCELL, 540 + (r - 3) * DCELL]);
-  }));
-  return out;
-};
-const dotPool = [...Array(24)].map(() => {
-  const c = document.createElementNS(NS, 'circle');
-  c.setAttribute('r', DOTR); c.setAttribute('cx', 540); c.setAttribute('cy', 540);
-  c.style.opacity = 0; gDots.append(c); return c;
-});
-const showDots = ch => {
-  const pts = dotsOf(ch);
-  dotPool.forEach((c, i) => {
-    if (i < pts.length) { c.setAttribute('cx', pts[i][0]); c.setAttribute('cy', pts[i][1]); c.style.opacity = 1; }
-    else c.style.opacity = 0;
-  });
-};
-
 let gymRAF, gymTimer;
 const gymStop = () => { clearTimeout(gymTimer); cancelAnimationFrame(gymRAF); gym.className = 'gym'; };
 
 // 시작 전 3 · 2 · 1 : 고리가 한 칸씩 줄고 도트가 다음 숫자로 옮겨 간다
 const runCountdown = n => {
   gym.className = 'gym on cd';
-  gPale.textContent = gFill.textContent = '';
-  gDots.style.display = '';
+  gNum.style.setProperty('--fill', 1);   // 카운트다운 숫자는 가득 찬 흰색
   let k = 3;
   const tick = () => {
-    showDots(String(k));
+    gPale.textContent = gFill.textContent = String(k);
+    gNum.classList.remove('flick'); void gNum.offsetWidth; gNum.classList.add('flick');   // 바뀔 때 도트가 튀듯 짧게
     gRing.style.strokeDashoffset = RC * (1 - k / 3);
     if (k-- > 1) gymTimer = setTimeout(tick, 1000);
-    else gymTimer = setTimeout(() => go(n + 1), 900);
+    else gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900);
   };
   tick();
 };
@@ -693,7 +664,6 @@ const runCountdown = n => {
 // 카운팅 : 1 부터. 당길수록 옅은 숫자가 아래에서 위로 흰색으로 차고, 다 차면 다음 숫자로
 const runReps = (s, n) => {
   gym.className = 'gym on';
-  gDots.style.display = 'none';
   gLabel(gTop, s.top, 200); gLabel(gBot, s.bottom, 500);
   let rep = 1;
   const show = () => { gPale.textContent = gFill.textContent = String(rep); };
@@ -703,11 +673,11 @@ const runReps = (s, n) => {
     if (rep === s.feedbackAt) { gym.classList.add('fb'); gLabel(gBot, s.feedback, 150); }
     const step = () => {
       const t = performance.now() - t0;
-      const e = Math.min(1, t / PULL), k = e * e * (3 - 2 * e);
+      const e = Math.min(1, t / PULL), k = 1 - Math.pow(1 - e, 3);   // 이즈아웃 : 처음 빠르게 당겼다가 끝에서 천천히
       gNum.style.setProperty('--fill', k.toFixed(3));
       if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
       if (rep === s.feedbackAt + 1) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다
-      if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1), 900); return; }
+      if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900); return; }
       gNum.style.setProperty('--fill', 0);
       gymTimer = setTimeout(pull, 260);
     };
@@ -727,7 +697,7 @@ const draw = s => {
   for (const [cls, html] of [['count', s.count], ['headline', s.text], ['meta', s.meta]]) {
     if (!html) continue;
     const el = document.createElement(cls === 'count' ? 'div' : 'p');
-    el.className = cls;
+    el.className = cls + (cls === 'headline' && s.cls ? ' ' + s.cls : '');
     stage.append(el);
     if (cls === 'count') {
       const [, v, total] = /^(\d+)<u>\/(\d+)<\/u>$/.exec(html);

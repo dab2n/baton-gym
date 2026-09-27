@@ -58,24 +58,14 @@
 
 <script>
 const SCENES = [
-  ['00',  '얼굴 대기',        'idle — 얼굴이 가까워지면 원이 커진다'],
-  ['01a', '엄지척 대기',      'Hello, shall we start your workout?'],
-  ['01a', '컨텍스트 수신',    'search — 회원 정보를 불러오는 중'],
-  ['01b', '인사',            'Welcome back, Somi.'],
-  ['01c', '오늘의 컨텍스트',  'Shoulder · Mild discomfort / Upper body'],
-  ['02a', '분석',            'Analyzing…'],
-  ['02b', '모드 결정',        'Shoulder-friendly mode · Level 03'],
-  ['02c', '강도 조정',        'Level 03 → Level 02'],
-  ['02d', '준비 완료',        'You’re all set.'],
-  ['03a', '세트 시작',        'Ready? · 10 REPS'],
-  ['03b', '수행 중 3/10',     'Keep going.'],
-  ['03c', '수행 중 4/10',     'Pull slowly.'],
-  ['03d', '실시간 조정 5/10',  'Resistance adjusted · Level 02'],
-  ['03e', '세트 완료 10/10',  'Set complete. / Take a rest.'],
-  ['05a', '운동 완료',        '30 REPS · 3 SETS'],
-  ['05b', '오늘의 기록',      'Upper body · Level 03 / 30 reps · 3 sets'],
-  ['05c', '저장',            'Workout saved.'],
-  ['05d', '작별',            'Goodbye, Somi.'],
+  ['00',  '얼굴 대기',     'idle — 얼굴이 가까워지면 원이 커진다'],
+  ['01',  '엄지척 대기',   'Hello, shall we start your workout?'],
+  ['02',  '맥락 전달',     '엄지척 인식 → 별 모션'],
+  ['03',  '안내 1',       'You had a medical / appointment today.'],
+  ['04',  '안내 2',       'I’ll go easy / on your shoulder.'],
+  ['05',  '준비',         'Are you ready? · Neutral Grip · 10 Reps · 3 Sets'],
+  ['06',  '시작 전',       '3 · 2 · 1 카운트다운 (빛의 고리)'],
+  ['07',  '카운팅',        '1 → 10 · 숫자가 아래에서 위로 차오름 · 자세 피드백'],
 ];
 
 const grid = document.getElementById('grid');
