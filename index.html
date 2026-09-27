@@ -129,8 +129,20 @@ body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacit
           mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
   opacity:.55; transition:opacity 1.4s ease; animation:rimOrbit 18s linear infinite; }
 @keyframes rimOrbit{ to{ rotate:360deg; } }
-body.fill .screen::before, body.fill .screen::after{ opacity:.85; }
+/* 얼굴 근접 : 띠는 캔버스(.bandc)가 12시부터 한 바퀴 그리며 나타난다 (병원과 같다) */
+body.fill .screen::before, body.fill .screen::after{ opacity:0; transition:none; }
 body.fill .rimlight{ opacity:.35; }
+.bandc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; }
+body.fill .bandc{ opacity:.85; }
+.bandc.on{ opacity:.85; }
+/* ---------- bye : 세션이 끝나면 인사하고, 띠를 돌려 지우며 대기 상태로 ---------- */
+body.bye .field{ transform:translate(1px,145.5px) scale(.17); opacity:0; }
+body.bye .blur39{ filter:blur(30px); }
+body.bye .screen::before, body.bye .screen::after{ opacity:0; transition:none; }
+body.bye .bandc{ opacity:.85; }
+body.bye .rimlight{ opacity:.35; }
+body.eraseb .screen::before, body.eraseb .screen::after{ opacity:0; transition:none; }
+body.eraseb .rimlight{ opacity:0; transition:opacity 1.2s ease; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
@@ -455,6 +467,7 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
 
   <div class="screen">
     <div class="rimlight" aria-hidden="true"></div>
+    <canvas class="bandc" width="540" height="540" aria-hidden="true"></canvas>
     <div class="blur39"><div class="field"></div></div>
     <div class="sheen"></div>
     <div class="core"></div>
@@ -531,6 +544,8 @@ const SCENES = [
   { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
   { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
     top:'Neutral Grip', bottom:'Set 1', feedbackAt:4, feedback:'Pull Slowly..' },
+  { look:'bye',    hold:4600, delay:900, hold1:true,                          // 마무리 인사 → 띠를 지우며 대기 상태로
+    text:'Nice set, Leo!' },
 ];
 
 const stage = document.querySelector('.stage');
@@ -808,6 +823,80 @@ discLoop();
 stroke.playbackRate = .8;   // 병원 로봇과 같은 속도
 // ponytail: 스트로크 영상(26s)은 병원 한 바퀴 분량이라 끝나면 끝 프레임과 가장 닮은 8.3s 로 되감는다 (완전한 이음매 아님)
 stroke.addEventListener('ended', () => { stroke.currentTime = 8.3; stroke.play().catch(() => {}); });
+// ---------- 얼굴 근접(fill) 의 색 띠 (캔버스, 호텔 로봇 연결 장면과 같은 그리기) ----------
+// 0.3s : 12시부터 시계 방향으로 1.7s 동안 한 바퀴 (머리 30° 흐림, 한 바퀴를 채우면 꼬리도 메워 이음매 없이)
+//        도는 동안 두 띠를 옆구리까지 넓혀(ext 1) 둘레가 한 줄로 이어지게 → 2.0s 부터 1.4s 동안 원래 위·아래로 물러남
+// leave : 문구가 빠질 때 .8s 동안 옅어진다
+const bandc = document.querySelector('.bandc'), bx = bandc.getContext('2d');
+const bandTmp = new OffscreenCanvas(540, 540), tx = bandTmp.getContext('2d');
+const bez = (x1, y1, x2, y2) => x => {   // CSS cubic-bezier 와 같은 곡선
+  let lo = 0, hi = 1, t = x;
+  for (let i = 0; i < 24; i++) { t = (lo + hi) / 2; const bx = 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3; bx < x ? lo = t : hi = t; }
+  return 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
+};
+const sweepEase = bez(.45, .05, .25, 1), extEase = bez(.4, 0, .2, 1);
+const clamp01 = v => Math.min(1, Math.max(0, v));
+const BANDS = [
+  { stops: [[.68, 'rgba(22,33,58,0)'], [.86, 'rgba(20,29,50,.4)'], [.97, '#16213A'], [1, '#16213A']],
+    lin: e => [[0, 1], [.07 + .29 * e, 1], [.18 + .32 * e, .7], [.32 + .34 * e, 0]], top: true },
+  { stops: [[.70, 'rgba(43,49,60,0)'], [.87, 'rgba(39,45,55,.4)'], [.97, '#2B313C'], [1, '#2B313C']],
+    lin: e => [[0, 1], [.06 + .30 * e, 1], [.17 + .33 * e, .72], [.30 + .36 * e, 0]], top: false },
+];
+const drawBands = (a0, a1, ext, alpha, endFade = 0, bandAlpha = [1, 1]) => {
+  bx.clearRect(0, 0, 540, 540);
+  if (alpha <= 0 || a1 <= a0) return;
+  // 원뿔 마스크 (각도는 12시 기준, 시계 방향) : 꼬리 a0 → +30° 불투명 … 머리 a1-30° → a1 투명
+  const p = a => clamp01(a / 360);
+  const o1 = p(Math.min(a0 + 30, a1 - 30)), o2 = Math.max(o1, p(a1 - 30)), o3 = Math.max(o2, p(a1));
+  const cone = tx.createConicGradient(-Math.PI / 2, 270, 270);
+  cone.addColorStop(p(a0), 'rgba(0,0,0,0)'); cone.addColorStop(Math.max(p(a0), o1), '#000');
+  if (endFade > 0) {   // 지울 때 : 12시 바로 왼쪽(끝)도 함께 흐려 이음매가 서지 않게
+    const oe = Math.max(o1, 1 - 40 / 360 * endFade);
+    cone.addColorStop(oe, '#000'); cone.addColorStop(1, `rgba(0,0,0,${(1 - endFade).toFixed(3)})`);
+  } else { cone.addColorStop(o2, '#000'); cone.addColorStop(o3, 'rgba(0,0,0,0)'); }
+  BANDS.forEach((B, bi) => {
+    tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, 540, 540);
+    const rg = tx.createRadialGradient(270, 270, 0, 270, 270, 265);
+    B.stops.forEach(([o, c]) => rg.addColorStop(o, c));
+    tx.fillStyle = rg; tx.fillRect(0, 0, 540, 540);
+    tx.globalCompositeOperation = 'destination-in';
+    const lg = B.top ? tx.createLinearGradient(0, 0, 0, 540) : tx.createLinearGradient(0, 540, 0, 0);
+    B.lin(ext).forEach(([o, a]) => lg.addColorStop(clamp01(o), `rgba(0,0,0,${a})`));
+    tx.fillStyle = lg; tx.fillRect(0, 0, 540, 540);
+    tx.fillStyle = cone; tx.fillRect(0, 0, 540, 540);
+    bx.globalAlpha = alpha * bandAlpha[bi]; bx.drawImage(bandTmp, 0, 0); bx.globalAlpha = 1;
+  });
+};
+const eraseBands = () => {
+  cancelAnimationFrame(bandRAF);
+  body.classList.add('eraseb'); bandc.classList.add('on');
+  const t0 = performance.now();
+  const f = () => {
+    const t = (performance.now() - t0) / 1000;
+    if (t > 1.4) { bx.clearRect(0, 0, 540, 540); bandc.classList.remove('on'); body.classList.remove('eraseb'); return; }
+    drawBands(400 * sweepEase(clamp01(t / 1.3)) - 40, 400, 0, 1, clamp01(t / .35));   // 인사 때 모습 그대로에서 12시부터 돌며 지운다
+    bandRAF = requestAnimationFrame(f);
+  };
+  f();
+};
+let bandRAF;
+const bandsRun = (look = 'fill') => {
+  cancelAnimationFrame(bandRAF);
+  const t0 = performance.now(); let outAt = 0;
+  const frame = () => {
+    if (!body.classList.contains(look)) { bx.clearRect(0, 0, 540, 540); return; }
+    const t = (performance.now() - t0) / 1000;
+    const a1 = 390 * sweepEase(clamp01((t - .3) / 1.7));
+    const a0 = t < 1.7 ? 0 : -30 * clamp01((t - 1.7) / .3);
+    const ext = t < 2 ? 1 : 1 - extEase(clamp01((t - 2) / 1.4));
+    if (body.classList.contains('leave') && !outAt) outAt = t;
+    const alpha = outAt ? 1 - clamp01((t - outAt) / .8) : 1;
+    drawBands(a0, a1, ext, alpha);
+    bandRAF = requestAnimationFrame(frame);
+  };
+  frame();
+};
+
 const go = n => {
   clearTimeout(timer);
   idx = n;
@@ -822,6 +911,8 @@ const go = n => {
       field.style.translate = field.style.rotate = field.style.borderRadius = '';
     }));
   }
+  if (s.look === 'idle' && body.classList.contains('bye')) eraseBands();   // 인사 뒤 : 색 띠를 돌려 지우며 구슬이 떠오른다
+  if (s.look === 'fill' || s.look === 'bye') requestAnimationFrame(() => bandsRun(s.look));
   body.classList.remove('cd', 'reps');
   if (s.mode) body.classList.add(s.mode === 'countdown' ? 'cd' : 'reps');   // 스트로크가 한 프레임 튀지 않게 미리
   body.className = [
@@ -842,7 +933,7 @@ const go = n => {
     sring.style.setProperty('--pb', 0);
     clearTimeout(pbTimer); pbTimer = setTimeout(() => sring.style.removeProperty('--pb'), 1700);
   }
-  if (s.hold) timer = setTimeout(() => go(n + 1), s.hold);
+  if (s.hold) timer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), s.hold);   // 마지막(인사) 뒤엔 대기 상태로
 };
 // 카메라가 없을 때의 수동 진행 : 한 단계씩, 마지막에서 리셋
 const tap = () => go(idx >= SCENES.length - 1 ? 0 : idx + 1);
