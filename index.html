@@ -371,6 +371,9 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
 .gym.fb .gfb::after { animation:fbWobB 4.1s ease-in-out infinite; }
 .gym.fb .gfb{ opacity:1; }
 
+/* 반응이 없으면(15s) 또는 사람이 보이지 않으면(4s) 문구가 아래로 빠지며 기본 화면으로 (병원과 같다) */
+body.fill.leave .stage > *{ translate:0 110px; opacity:0;
+  transition:translate .8s cubic-bezier(.55,0,.8,.35), opacity .7s ease; }
 /* ---------- 본문 : 한 장면 = 카운터 + 문장 + 부가정보 ---------- */
 /* flex 로 세로 중앙 정렬 — 줄 수·구성이 달라도 항상 스크린 정중앙 */
 .stage{
@@ -981,6 +984,13 @@ const bandsRun = (look = 'fill') => {
   frame();
 };
 
+// 안내를 보고 있지 않으면(15s 무응답 · 사람이 4s 안 보이면) 문구가 아래로 빠지며 대기 상태로 (병원과 같다)
+const leaveFill = () => {
+  if (!body.classList.contains('fill') || body.classList.contains('leave')) return;
+  body.classList.add('leave');
+  clearTimeout(timer); timer = setTimeout(() => go(0), 850);
+};
+window.__leaveFill = leaveFill;
 const go = n => {
   clearTimeout(timer);
   idx = n;
@@ -997,6 +1007,7 @@ const go = n => {
   }
   if (s.look === 'idle' && body.classList.contains('bye')) eraseBands();   // 인사 뒤 : 색 띠를 돌려 지우며 구슬이 떠오른다
   if (s.look === 'fill' || s.look === 'bye') requestAnimationFrame(() => bandsRun(s.look));
+  if (s.look === 'fill') { window.__fillAt = performance.now(); timer = setTimeout(leaveFill, 15000); }
   body.classList.remove('cd', 'reps');
   if (s.mode) body.classList.add(s.mode === 'countdown' ? 'cd' : 'reps');   // 스트로크가 한 프레임 튀지 않게 미리
   body.className = [
@@ -1073,7 +1084,7 @@ const cv    = document.getElementById('camc');
 const cx    = cv.getContext('2d');
 const say   = t => { stat.textContent = t; };
 
-let fd, gr, hits = 0, last = -1;
+let fd, gr, hits = 0, last = -1, faceAt = 0;
 
 const loop = () => {
   requestAnimationFrame(loop);
@@ -1105,6 +1116,8 @@ const loop = () => {
   }
 
   const n = window.__step();
+  if (face) faceAt = t;
+  if (n === 1 && t - Math.max(faceAt, window.__fillAt || 0) > 4000) window.__leaveFill();   // 안내를 보고 있지 않으면
   say('얼굴 ' + (ratio ? Math.round(ratio * 100) + '%' : '—') + ' / ' + Math.round(NEAR * 100) + '%\n'
     + '제스처 ' + (g ? g.categoryName + ' ' + g.score.toFixed(2) : '—') + '\n'
     + (n === 0 ? '얼굴을 가까이' : n === 1 ? '엄지척을 올리세요' : '진행 중'));
