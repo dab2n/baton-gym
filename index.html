@@ -100,7 +100,8 @@ body.kiosk .cam{ display:none; }
 /* ---------- 스크린 1080x1080 ---------- */
 .screen{
   position:absolute; inset:0; border-radius:50%;
-  background:#000;
+  /* 배경 (피그마 헬스장 ui) : 위 감청 → 검정 → 아래 회색 */
+  background:linear-gradient(180deg, #0F1627 9%, #000 33%, #000 80%, #3D3D3D 98%);
   overflow:hidden;
   clip-path:circle(520px at 540px 540px);
 }
@@ -296,7 +297,10 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
           mask-image:radial-gradient(circle at 50% 50%, transparent 0 441px, #000 444px 450px, transparent 453px);
   filter:blur(9px); opacity:0; transition:opacity .8s ease; pointer-events:none; }
 body.full.cd .dring{ opacity:.95; }   /* 디자인 원형은 카운트다운에서만 (문장 화면은 스트로크 모션) */
-body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
+@keyframes cdFade{   /* 제자리에서 천천히 옅어진다 (옆으로 빠지지 않는다) */
+  0%{ opacity:0; scale:1.04; } 18%{ opacity:.95; scale:1; } 72%{ opacity:.9; } 100%{ opacity:0; scale:.99; }
+}
+body.full.cd .dring{ animation:cdFade 3.2s ease both; }
 @keyframes cdRing{
   0%   { translate:-50% -50%; scale:1; }
   33%  { translate:calc(-50% + 954px) calc(-50% + 62px); scale:1.067; }
@@ -308,14 +312,18 @@ body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
    (랫풀다운 : 끝까지 당기면 다 차고 다음 숫자로) */
 .gym{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .45s ease; z-index:1; }
 .gym.on{ opacity:1; }
+body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  box-shadow:inset 0 0 80px 30px rgba(246,226,128,.2); opacity:1; background:none; -webkit-mask:none; mask:none; }
 .glab{ position:absolute; left:0; right:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }
-.gtop{ top:148px; color:rgba(255,255,255,.9); }
-.gbot{ top:904px; color:#fff; }
+.gtop{ top:166px; color:rgba(255,255,255,.9); }   /* 노치 아래 78 에서 88 (피그마) */
+.gbot{ top:922px; color:#fff; }                     /* 아래 베젤 1060 에서 88 (피그마) */
 .gnum.flick{ animation:numFlick .26s cubic-bezier(.3,0,.2,1); }
 @keyframes numFlick{ 0%{ filter:blur(7px); scale:1.08; } 60%{ filter:blur(0); scale:1; } 100%{ filter:blur(0); scale:1; } }
 /* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
    left/top 50% 만으로 좌우·위아래가 정확히 가운데에 온다 (글자 상자 기준 정렬의 쏠림이 없다) */
 .gnum{ position:absolute; left:50%; top:50%; translate:-50% -50%; }
+body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.5) 100%);
+                       mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.5) 100%); }   /* 숫자 아래쪽만 살짝 어둡게 */
 .gnum span{ position:absolute; inset:0; color:rgba(255,255,255,.22); }
 .gnum svg{ display:block; width:100%; height:100%; }
 /* 아래에서 위로 채워진다 : 경계를 부드럽게 (도트가 한 칸씩 뚝 켜지지 않게) */
@@ -323,10 +331,12 @@ body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
   -webkit-mask-image:linear-gradient(0deg, #000 0, #000 calc(var(--fill, 0) * 100%), rgba(0,0,0,.45) calc(var(--fill, 0) * 100% + 9%), transparent calc(var(--fill, 0) * 100% + 20%));
           mask-image:linear-gradient(0deg, #000 0, #000 calc(var(--fill, 0) * 100%), rgba(0,0,0,.45) calc(var(--fill, 0) * 100% + 9%), transparent calc(var(--fill, 0) * 100% + 20%)); }
 /* 피드백 : 아래쪽에서 번지는 빛과 함께 조언이 떠올랐다가, 자세가 돌아오면 사라진다 */
-.gfb{ position:absolute; left:-10%; right:-10%; bottom:-14%; height:46%; opacity:0; transition:opacity .9s ease; }
+.gfb{ position:absolute; inset:0; opacity:0; translate:0 22%;
+  transition:opacity .8s ease, translate .9s cubic-bezier(.25,.8,.3,1); }   /* 아래에서 올라오며 나타난다 */
+.gym.fb .gfb{ translate:0 0; }
 .gfb::before, .gfb::after{ content:''; position:absolute; inset:0; }
-.gfb::before{ background:radial-gradient(60% 70% at 46% 100%, rgba(36,76,180,.75), rgba(36,76,180,0) 70%); filter:blur(40px); }
-.gfb::after { background:radial-gradient(42% 60% at 72% 96%, rgba(198,164,74,.5), rgba(198,164,74,0) 70%); filter:blur(46px); }
+.gfb::before{ background:radial-gradient(437px 181px at 509px 902px, #3d67cf 0%, rgba(32,58,140,.85) 42%, rgba(16,26,66,0) 76%); filter:blur(33px); }
+.gfb::after { background:radial-gradient(222px 154px at 702px 896px, rgba(226,196,120,.75), rgba(226,196,120,0) 70%); opacity:.3; filter:blur(40px); }
 .gym.fb .gfb{ opacity:1; }
 
 /* ---------- 본문 : 한 장면 = 카운터 + 문장 + 부가정보 ---------- */
@@ -692,12 +702,12 @@ const gLabel = (el, text, delay = 0) => {
   split(el); letters(el, delay, true);
 };
 
-let gymRAF, gymTimer;
-const gymStop = () => { clearTimeout(gymTimer); cancelAnimationFrame(gymRAF); gym.className = 'gym'; body.classList.remove('cd', 'reps'); };
+let gymRAF, gymTimer, fbTimer;
+const gymStop = () => { clearTimeout(gymTimer); clearTimeout(fbTimer); cancelAnimationFrame(gymRAF); gym.className = 'gym'; };
 
 // 시작 전 3 · 2 · 1 : 고리가 한 칸씩 줄고 도트가 다음 숫자로 옮겨 간다
 const runCountdown = n => {
-  gym.className = 'gym on cd'; body.classList.add('cd'); body.classList.remove('reps');
+  gym.className = 'gym on cd';
   gNum.style.setProperty('--fill', 1);   // 카운트다운 숫자는 가득 찬 흰색
   let k = 3;
   const tick = () => {
@@ -711,17 +721,18 @@ const runCountdown = n => {
 
 // 카운팅 : 1 부터. 당길수록 옅은 숫자가 아래에서 위로 흰색으로 차고, 다 차면 다음 숫자로
 const runReps = (s, n) => {
-  gym.className = 'gym on'; body.classList.add('reps'); body.classList.remove('cd');
+  gym.className = 'gym on';
   gLabel(gTop, s.top, 200); gLabel(gBot, s.bottom, 500);
   let rep = 1;
   const show = () => setNum(String(rep));
   const pull = () => {
     show();
-    const t0 = performance.now(), PULL = 1500, HOLD = 420;   // 천천히 당겼다가 잠깐 버틴다
-    if (rep === s.feedbackAt) { gym.classList.add('fb'); gLabel(gBot, s.feedback, 150); }
+    const t0 = performance.now(), PULL = 2300, HOLD = 600;   // 천천히 당겼다가 잠깐 버틴다
+    // 피드백 : 그래픽이 아래에서 올라온 뒤(0.7s) 글이 쓰인다
+    if (rep === s.feedbackAt) { gym.classList.add('fb'); fbTimer = setTimeout(() => gLabel(gBot, s.feedback, 0), 700); }
     const step = () => {
       const t = performance.now() - t0;
-      const e = Math.min(1, t / PULL), k = 1 - Math.pow(1 - e, 5);   // 이즈아웃 : 처음 쭉 당겼다가 끝에서 아주 천천히
+      const e = Math.min(1, t / PULL), k = Math.pow(e, 1.9);   // 처음엔 천천히, 끝에서 쭉 차오른다
       gNum.style.setProperty('--fill', k.toFixed(3));
       if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
       if (rep === s.feedbackAt + 1) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다
@@ -811,10 +822,14 @@ const go = n => {
       field.style.translate = field.style.rotate = field.style.borderRadius = '';
     }));
   }
+  body.classList.remove('cd', 'reps');
+  if (s.mode) body.classList.add(s.mode === 'countdown' ? 'cd' : 'reps');   // 스트로크가 한 프레임 튀지 않게 미리
   body.className = [
     body.classList.contains('bare')  ? 'bare'  : '',
     body.classList.contains('kiosk') ? 'kiosk' : '',
     body.classList.contains('shot')  ? 'shot'  : '',   // 투명 배경 내보내기 유지
+    body.classList.contains('cd')    ? 'cd'    : '',
+    body.classList.contains('reps')  ? 'reps'  : '',
     s.look,
   ].filter(Boolean).join(' ');
   draw(s);
