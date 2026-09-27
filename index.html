@@ -34,8 +34,6 @@ body{
 .device, .device *{ letter-spacing:-0.02em; }
 
 /* 폰트 대체 : Magnetik 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
-/* 숫자 : 병원 로봇 길안내와 같은 OffBit Dot Bold (체험판이라 fonts/ 는 저장소에 올리지 않는다) */
-@font-face{ font-family:'OffBit Dot'; font-weight:700; src:local('OffBitTrial-DotBold'), local('OffBit Trial Dot Bold'), url('fonts/OffBitTrial-DotBold.woff') format('woff'); }
 @font-face{ font-family:'Pretendard Web'; font-weight:400; font-display:swap;
   src:local('Pretendard Regular'), local('Pretendard-Regular'), url('pretendard/Pretendard-Regular.subset.woff2') format('woff2'); }
 @font-face{ font-family:'Pretendard Web'; font-weight:500; font-display:swap;
@@ -154,9 +152,11 @@ body.fill .rimlight{ opacity:.35; }
 }
 
 body.idle   .field{ transform:translate(1px,145.5px) scale(.22); }
-/* 엄지척 대기 : 구슬이 화면을 채우지만 아주 옅게 + 색을 빼 화면은 어둡게 유지 */
-body.fill   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.03; filter:grayscale(1); }
-body.search .field{ transform:translate(1px,145.5px) scale(.58); opacity:.06; filter:grayscale(1); }
+/* 엄지척 대기 : 구슬이 커지면서 그대로 사라진다 (병원 로봇과 같게).
+   옅게라도 남기면 화면 전체에 반투명한 흰 막이 깔린다 : 완전히 0 으로 */
+body.fill   .field{ transform:translate(1px,145.5px) scale(.16); opacity:0; }   /* 커지며 흰 반투명이 남지 않게 : 어두워지며 작아진다 (병원과 같다) */
+body.fill   .blur39{ filter:blur(30px); }
+body.search .field{ transform:translate(1px,145.5px) scale(.58); opacity:0; }
 body.full   .field{ transform:translate(1px,145.5px) scale(1.2); opacity:0; }
 /* 색 블롭은 idle 에서만 : 검은 화면에선 파랗고 누렇게 비친다 */
 body:not(.idle) .sheen, body:not(.idle) .core, body:not(.idle) .cyan{ opacity:0; }
@@ -281,8 +281,10 @@ body.full   .rim::after{ animation:orbit 11s linear infinite; }
          -webkit-mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
                  mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
          pointer-events:none; }
-/* 디자인(피그마 3590:7370)에는 문장·카운팅 화면에 스트로크 링이 없다 : 켜지 않는다 (카운트다운 고리 .gring 만) */
-/* body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) both; } */
+/* 엄지척(별 모션) 뒤 첫 문장부터 스트로크가 가운데에서 커진다 (병원 로봇과 같은 등장) */
+body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) both; }
+/* 카운트다운·카운팅 화면에는 디자인(피그마 3590:7370)대로 링이 없다 (카운트다운 고리 .dring 만) */
+body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 /* 스트로크가 도는 동안은 영상만 : 위아래 색 띠와 가장자리 발광을 끈다 */
 body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacity:0; }
 
@@ -293,8 +295,7 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
   -webkit-mask-image:radial-gradient(circle at 50% 50%, transparent 0 441px, #000 444px 450px, transparent 453px);
           mask-image:radial-gradient(circle at 50% 50%, transparent 0 441px, #000 444px 450px, transparent 453px);
   filter:blur(9px); opacity:0; transition:opacity .8s ease; pointer-events:none; }
-body.full .dring{ opacity:.95; }
-body.full.reps .dring{ opacity:0; }                                  /* 카운팅 화면엔 원형이 없다 */
+body.full.cd .dring{ opacity:.95; }   /* 디자인 원형은 카운트다운에서만 (문장 화면은 스트로크 모션) */
 body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
 @keyframes cdRing{
   0%   { translate:-50% -50%; scale:1; }
@@ -303,7 +304,7 @@ body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
 }
 
 /* ---------- 운동 화면 (피그마 3590:7370) : 위 라벨 · 가운데 숫자 · 아래 라벨 ----------
-   숫자는 병원 로봇과 같은 OffBit Dot Bold. 옅은 숫자가 아래에서 위로 흰색으로 차오르는 것이 곧 게이지다
+   숫자는 병원 로봇과 같은 OffBit Dot Bold 모양을 도트로 직접 그린다. 옅은 숫자가 아래에서 위로 흰색으로 차오르는 것이 곧 게이지다
    (랫풀다운 : 끝까지 당기면 다 차고 다음 숫자로) */
 .gym{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .45s ease; z-index:1; }
 .gym.on{ opacity:1; }
@@ -312,9 +313,11 @@ body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
 .gbot{ top:904px; color:#fff; }
 .gnum.flick{ animation:numFlick .26s cubic-bezier(.3,0,.2,1); }
 @keyframes numFlick{ 0%{ filter:blur(7px); scale:1.08; } 60%{ filter:blur(0); scale:1; } 100%{ filter:blur(0); scale:1; } }
-.gnum{ position:absolute; left:0; right:0; top:50%; translate:0 -50%; transition:translate .12s ease; letter-spacing:0; height:263px;
-       font-family:'OffBit Dot', monospace; font-weight:700; font-size:283px; line-height:263px; text-align:center; }
+/* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
+   left/top 50% 만으로 좌우·위아래가 정확히 가운데에 온다 (글자 상자 기준 정렬의 쏠림이 없다) */
+.gnum{ position:absolute; left:50%; top:50%; translate:-50% -50%; }
 .gnum span{ position:absolute; inset:0; color:rgba(255,255,255,.22); }
+.gnum svg{ display:block; width:100%; height:100%; }
 /* 아래에서 위로 채워진다 : 경계를 부드럽게 (도트가 한 칸씩 뚝 켜지지 않게) */
 .gnum .fillz{ color:#fff;
   -webkit-mask-image:linear-gradient(0deg, #000 0, #000 calc(var(--fill, 0) * 100%), rgba(0,0,0,.45) calc(var(--fill, 0) * 100% + 9%), transparent calc(var(--fill, 0) * 100% + 20%));
@@ -422,8 +425,8 @@ body.full.cd .dring{ animation:cdRing 3.1s cubic-bezier(.4,0,.5,1) both; }
   <button type="button" data-go="0">대기 상태</button>
   <button type="button" data-go="2">맥락 전달</button>
   <button type="button" data-go="3">대화 시작</button>
-  <button type="button" data-go="9">운동 세트</button>
-  <button type="button" data-go="14">마무리</button>
+  <button type="button" data-go="7">시작 전</button>
+  <button type="button" data-go="8">카운팅</button>
 </nav>
 <button class="toggle" type="button" aria-pressed="true">
   <span class="sw"></span><span class="lb">제품 목업</span>
@@ -644,15 +647,41 @@ const gym = document.querySelector('.gym');
 const gTop = gym.querySelector('.gtop'), gBot = gym.querySelector('.gbot');
 const gPale = gym.querySelector('.pale'), gFill = gym.querySelector('.fillz');
 const gNum = gym.querySelector('.gnum');
-// OffBit 숫자는 글자마다 좌우 여백이 달라 가운데에서 밀린다 : 실제 먹물 폭을 재서 그만큼 옮긴다
-const inkCx = document.createElement('canvas').getContext('2d');
-const centerNum = ch => {
-  inkCx.font = "700 283px 'OffBit Dot', monospace";
-  const m = inkCx.measureText(ch);
-  // 가운데 정렬은 글자 상자(advance) 기준이라 먹물이 한쪽으로 쏠린다 : 먹물 가운데가 화면 가운데에 오도록 되돌린다
-  const ls = parseFloat(getComputedStyle(gNum).letterSpacing) || 0;   // 자간은 글자 뒤에도 붙어 가운데를 밀어낸다
-  const shift = m.width / 2 - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 + ls / 2 - 2.5;   // -2.5 : 캔버스 계산과 실제 렌더링의 차이(실측)
-  gNum.style.translate = `${shift.toFixed(1)}px -50%`;
+const NUMDOT = {
+  '0':'00111111100,01111111110,11100000111,11000000011,11000000011,11000000011,11000000011,11000000011,11000000011,11000000011,11100000111,01111111110,00111111100',
+  '1':'00110000000,01110000000,11110000000,10110000000,00110000000,00110000000,00110000000,00110000000,00110000000,00110000000,00110000000,11111100000,11111100000',
+  '2':'00111111000,01111111100,11100001110,11000000110,11000001110,00000011100,00000111000,00001110000,00011100000,00111000000,01110000000,11111111110,11111111110',
+  '3':'00111110000,01111111000,11100011100,11000001100,00000011100,00111111000,00111110000,00000111000,00000011100,11000001100,11100011100,01111111000,00111110000',
+  '4':'00000000110,00000001110,00000011110,00000111110,00001110110,00011100110,00111000110,01110000110,11111111111,11111111111,00000000110,00000000110,00000000110',
+  '5':'01111111100,01111111100,11100000000,11000000000,11000000000,11111111000,11111111100,11100001110,00000000110,11000000110,11100001110,01111111100,00111111000',
+  '6':'00111110000,01111111000,11100011100,11000001100,11000000000,11011110000,11111111000,11100011100,11000001100,11000001100,11100011100,01111111000,00111110000',
+  '7':'11111111100,11111111100,00000011000,00000110000,00000110000,00001100000,00001100000,00011000000,00011000000,00011000000,00110000000,00110000000,00110000000',
+  '8':'00111110000,01111111000,11100011100,11000001100,11100011100,01111111000,00111110000,01100011000,11000001100,11000001100,11100011100,01111111000,00111110000',
+  '9':'00111110000,01111111000,11100011100,11000001100,11000001100,11100011100,01111111100,00111101100,00000001100,11000001100,11100011100,01111111000,00111110000',
+};
+const NUMP = 54, NUMR = 27, NUMROWS = 13;        // 격자 간격 · 도트 반지름 · 줄 수
+const NUMPX = 262.76 / ((NUMROWS - 1) * NUMP + 2 * NUMR);   // 피그마 숫자 높이 262.76 에 맞춘 배율
+// 숫자를 도트 원으로 그린다. 켜진 칸의 좌우 끝을 재서 상자를 딱 맞추므로 가운데 정렬이 저절로 맞는다
+const setNum = str => {
+  let x = 0, dots = '', x0 = Infinity, x1 = -Infinity;
+  for (const ch of str) {
+    const rows = NUMDOT[ch].split(',');
+    let c0 = 99, c1 = -1;
+    rows.forEach(line => [...line].forEach((b, c) => { if (b === '1') { if (c < c0) c0 = c; if (c > c1) c1 = c; } }));
+    rows.forEach((line, r) => [...line].forEach((b, c) => {
+      if (b !== '1') return;
+      const cx = x + NUMR + (c - c0) * NUMP, cy = NUMR + r * NUMP;
+      dots += `<circle cx="${cx}" cy="${cy}" r="${NUMR}"/>`;
+      if (cx - NUMR < x0) x0 = cx - NUMR;
+      if (cx + NUMR > x1) x1 = cx + NUMR;
+    }));
+    x += (c1 - c0) * NUMP + 2 * NUMR + NUMP;   // 숫자 사이 한 칸
+  }
+  const H = (NUMROWS - 1) * NUMP + 2 * NUMR, W = x1 - x0;
+  const svg = `<svg viewBox="${x0} 0 ${W} ${H}" fill="currentColor" preserveAspectRatio="xMidYMid meet">${dots}</svg>`;
+  gPale.innerHTML = gFill.innerHTML = svg;
+  gNum.style.width = (W * NUMPX).toFixed(1) + 'px';
+  gNum.style.height = (H * NUMPX).toFixed(1) + 'px';
 };
 
 // 라벨도 문장과 같은 규칙으로 한 글자씩 (병원 로봇과 통일)
@@ -672,7 +701,7 @@ const runCountdown = n => {
   gNum.style.setProperty('--fill', 1);   // 카운트다운 숫자는 가득 찬 흰색
   let k = 3;
   const tick = () => {
-    gPale.textContent = gFill.textContent = String(k); centerNum(String(k));
+    setNum(String(k));
     gNum.classList.remove('flick'); void gNum.offsetWidth; gNum.classList.add('flick');   // 바뀔 때 도트가 튀듯 짧게
     if (k-- > 1) gymTimer = setTimeout(tick, 1000);
     else gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900);
@@ -685,7 +714,7 @@ const runReps = (s, n) => {
   gym.className = 'gym on'; body.classList.add('reps'); body.classList.remove('cd');
   gLabel(gTop, s.top, 200); gLabel(gBot, s.bottom, 500);
   let rep = 1;
-  const show = () => { gPale.textContent = gFill.textContent = String(rep); centerNum(String(rep)); };
+  const show = () => setNum(String(rep));
   const pull = () => {
     show();
     const t0 = performance.now(), PULL = 1500, HOLD = 420;   // 천천히 당겼다가 잠깐 버틴다
@@ -806,8 +835,8 @@ window.__go = go; window.__step = () => idx;
 
 const jump = document.querySelector('.jump');
 jump.addEventListener('pointerdown', e => e.stopPropagation());
-jump.addEventListener('click', e => { const k = e.target.dataset?.go; if (k) go(+k); });
-const JUMPS = [0, 2, 3, 9, 14];
+jump.addEventListener('click', e => { const k = e.target.closest('[data-go]')?.dataset.go; if (k != null) { e.preventDefault(); e.stopPropagation(); go(+k); } }, true);
+const JUMPS = [0, 2, 3, 7, 8];   // 버튼 data-go 와 같은 장면 번호
 setInterval(() => {
   const cur = [...JUMPS].reverse().find(n => idx >= n) ?? 0;
   for (const b of jump.children) b.classList.toggle('on', +b.dataset.go === cur);
