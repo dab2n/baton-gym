@@ -102,9 +102,9 @@ body.kiosk .cam{ display:none; }
 /* ---------- 스크린 1080x1080 ---------- */
 .screen{
   position:absolute; inset:0; border-radius:50%;
-  /* 배경 (피그마 헬스장 ui) : 위 감청 → 검정 → 아래 회색 */
-  background:linear-gradient(180deg, #0F1627 9%, #000 33%, #000 80%, #3D3D3D 98%);
-  transition:background .9s ease;
+  /* 배경 : 기본은 순검정. 위아래 색(피그마 헬스장 ui)은 카운트다운·카운팅에서만 쓴다
+     (스트로크 모션이 도는 문장 화면과는 같이 쓰지 않는다) */
+  background:#000; transition:background .9s ease;
   overflow:hidden;
   clip-path:circle(520px at 540px 540px);
 }
@@ -123,7 +123,7 @@ body.kiosk .cam{ display:none; }
           mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.72) 17%, transparent 30%); }
 /* 기본 화면(얼굴 인식 전)은 위아래 아무것도 없이 순검정. 띠는 구슬이 커질 때부터 */
 body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacity:0; }
-body.idle .screen{ background:#000; }   /* 디폴트는 위아래 색 없이 순검정 (구슬만) */
+body.cd .screen, body.reps .screen{ background:linear-gradient(180deg, #0F1627 9%, #000 33%, #000 80%, #3D3D3D 98%); }
 /* 그 색이 가장자리를 따라 아주 천천히 돈다 : 원뿔 그라디언트를 테두리 쪽만 남기고 회전 */
 .rimlight{ position:absolute; inset:-8%; pointer-events:none;
   background:conic-gradient(from 0deg,
@@ -304,30 +304,13 @@ body.full   .rim::after{ animation:orbit 11s linear infinite; }
          pointer-events:none; }
 /* 엄지척(별 모션) 뒤 첫 문장부터 스트로크가 가운데에서 커진다 (병원 로봇과 같은 등장) */
 body.full .sring{ opacity:1; animation:ringIn 1.7s cubic-bezier(.22,.61,.2,1) both; }
-/* 카운트다운·카운팅 화면에는 디자인(피그마 3590:7370)대로 링이 없다 (카운트다운 고리 .dring 만) */
+/* 카운트다운·카운팅 화면엔 링이 없다 : 카운트다운은 숫자(도트)의 이동만으로 */
 body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 /* 스트로크가 도는 동안은 영상만 : 위아래 색 띠와 가장자리 발광을 끈다 */
 body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacity:0; }
 
-/* 디자인 원형 : 반지름 446.7 · 두께 6 · 연노랑에서 흰색으로 도는 빛, 흐림 9 (피그마 924:64 Ellipse 31309).
-   문장 화면에 늘 떠 있고, 카운트다운에서는 오른쪽 아래로 흘러나가며 커진다 (3·2·1 프레임 실측) */
-/* 상자는 스크린 전체(1080) : 893 상자에선 고리와 번짐이 좌우에서 잘렸다 */
-.dring{ position:absolute; inset:0; width:1080px; height:1080px; border-radius:50%;
-  background:conic-gradient(from 90deg, #fff 0deg, #1C2733 29.7deg, #fff 360deg);
-  -webkit-mask-image:radial-gradient(circle at 50% 50%, transparent 0 440.7px, #000 441.7px 445.7px, transparent 446.7px);
-          mask-image:radial-gradient(circle at 50% 50%, transparent 0 440.7px, #000 441.7px 445.7px, transparent 446.7px);
-  filter:blur(10px); opacity:0; transition:opacity .8s ease; pointer-events:none; }
-/* 어두운 자리가 한 바퀴 돌아 고리가 흐르는 것처럼 보인다 */
-@keyframes dringSpin{ to{ rotate:360deg; } }
-@keyframes cdFade{   /* 제자리에서 천천히 옅어진다 (옆으로 빠지지 않는다) */
-  0%{ opacity:0; } 14%{ opacity:1; } 76%{ opacity:1; } 100%{ opacity:0; }
-}
-body.full.cd .dring{ animation:cdFade 3.9s ease both, dringSpin 4.2s linear infinite; }
-@keyframes cdRing{
-  0%   { translate:-50% -50%; scale:1; }
-  33%  { translate:calc(-50% + 954px) calc(-50% + 62px); scale:1.067; }
-  66%, 100% { translate:calc(-50% + 1251px) calc(-50% + 714px); scale:1.4; }
-}
+/* 카운트다운은 고리 없이 숫자(도트)의 이동만으로 (스트로크가 두 겹 보이던 것도 함께 삭제) */
+body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 
 /* ---------- 운동 화면 (피그마 3590:7370) : 위 라벨 · 가운데 숫자 · 아래 라벨 ----------
    숫자는 병원 로봇과 같은 OffBit Dot Bold 모양을 도트로 직접 그린다. 옅은 숫자가 아래에서 위로 흰색으로 차오르는 것이 곧 게이지다
@@ -337,14 +320,15 @@ body.full.cd .dring{ animation:cdFade 3.9s ease both, dringSpin 4.2s linear infi
 body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
   box-shadow:inset 0 0 130px 8px rgba(246,226,128,.085);   /* 은은하게 : 넓게 퍼지고 아주 옅게 */ opacity:1; background:none; -webkit-mask:none; mask:none; }
 .glab{ position:absolute; left:0; right:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }
-.gtop{ top:166px; color:rgba(255,255,255,.9); }   /* 노치 아래 78 에서 88 (피그마) */
-.gbot{ top:922px; color:#fff; }                     /* 아래 베젤 1060 에서 88 (피그마) */
+.gtop{ top:181px; color:rgba(255,255,255,.9); }   /* 노치 아래(78)에서 글자 위까지 110 (피그마 실측) */
+.gbot{ top:908px; color:#fff; }                     /* 글자 밑에서 아래 베젤(1060)까지 111 (피그마 실측) */
 /* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
    left/top 50% 만으로 좌우·위아래가 정확히 가운데에 온다 (글자 상자 기준 정렬의 쏠림이 없다) */
 .gnum{ position:absolute; left:50%; top:50%; translate:-50% -50%; width:380px; height:262.76px; }
 /* 숫자가 바뀌면 도트를 새로 그리지 않고 자리만 옮긴다 : 도트들이 흘러가 다음 숫자를 만든다 */
 .gnum circle{ fill:currentColor;
   transition:cx .44s cubic-bezier(.3,0,.2,1), cy .44s cubic-bezier(.3,0,.2,1), r .44s ease, opacity .28s ease; }
+body.reps .gnum circle{ transition:opacity .18s ease; }   /* 카운팅은 도트 이동 없이 숫자별로 바로 */
 body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.5) 100%);
                        mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.5) 100%); }   /* 숫자 아래쪽만 살짝 어둡게 */
 .gnum span{ position:absolute; inset:0; color:rgba(255,255,255,.22); }
@@ -519,7 +503,6 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
       <div class="sdisc"><i></i></div>
     </div>
 
-    <div class="dring" aria-hidden="true"></div>
     <div class="gym" aria-hidden="true">
       <div class="gfb"></div>
       <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
