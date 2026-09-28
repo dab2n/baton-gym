@@ -40,8 +40,6 @@ body{
 @font-face{ font-family:'SF Pro KR'; font-weight:700; font-display:block;
   src:url('fonts/SFProKR-Bold.otf') format('opentype');
   unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
-/* 숫자용 : 병원 길안내와 같은 OffBit Dot Bold (도트를 뽑아 쓰므로 모양이 곧 폰트다) */
-@font-face{ font-family:'OffBit Dot'; font-weight:700; src:local('OffBitTrial-DotBold'), local('OffBit Trial Dot Bold'), url('fonts/OffBitTrial-DotBold.woff') format('woff'); }
 /* 폰트 대체 : Magnetik 가 없는 컴퓨터(배포 링크)에선 Pretendard 로. 자간은 굵기·크기별 실측 보정 */
 @font-face{ font-family:'Pretendard Web'; font-weight:400; font-display:swap;
   src:local('Pretendard Regular'), local('Pretendard-Regular'), url('pretendard/Pretendard-Regular.subset.woff2') format('woff2'); }
@@ -323,7 +321,7 @@ body.full .screen::before, body.full .screen::after, body.full .rimlight{ opacit
 body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 
 /* ---------- 운동 화면 (피그마 3590:7370) : 위 라벨 · 가운데 숫자 · 아래 라벨 ----------
-   숫자는 병원 로봇과 같은 OffBit Dot Bold 모양을 도트로 직접 그린다. 옅은 숫자가 아래에서 위로 흰색으로 차오르는 것이 곧 게이지다
+   숫자는 DGM Composta 의 5x7 도트 모양을 그대로 그린다. 옅은 숫자가 아래에서 위로 흰색으로 차오르는 것이 곧 게이지다
    (랫풀다운 : 끝까지 당기면 다 차고 다음 숫자로) */
 .gym{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .45s ease; z-index:1; }
 .gym.on{ opacity:1; }
@@ -334,7 +332,7 @@ body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:
 .gbot{ top:908px; color:#fff; }                     /* 글자 밑에서 아래 베젤(1060)까지 111 (피그마 실측) */
 /* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
    left/top 50% 만으로 좌우·위아래가 정확히 가운데에 온다 (글자 상자 기준 정렬의 쏠림이 없다) */
-.gnum{ position:absolute; left:50%; top:50%; translate:-50% -50%; width:380px; height:262.76px; }
+.gnum{ position:absolute; left:50%; top:50%; translate:-50% -50%; width:460px; height:262.76px; }
 /* 숫자가 바뀌면 도트를 새로 그리지 않고 자리만 옮긴다 : 도트들이 흘러가 다음 숫자를 만든다 */
 .gnum circle{ fill:currentColor;
   transition:cx .44s cubic-bezier(.3,0,.2,1), cy .44s cubic-bezier(.3,0,.2,1), r .44s ease, opacity .28s ease; }
@@ -694,76 +692,39 @@ const gym = document.querySelector('.gym');
 const gTop = gym.querySelector('.gtop'), gBot = gym.querySelector('.gbot');
 const gPale = gym.querySelector('.pale'), gFill = gym.querySelector('.fillz');
 const gNum = gym.querySelector('.gnum');
+// 숫자 도트 : DGM Composta Trial Regular (fonts.xyz 체험판) 의 5x7 격자를 그대로 옮겨 적었다.
+// 칸 100 · 도트 Ø94 · 글자 폭 494 · 보내기 650 (폰트 단위). 글자 모양이 곧 도트라 파일 없이도 어디서나 같다.
+// 숫자가 바뀌면 도트를 새로 그리지 않고 자리만 옮겨, 도트들이 다음 숫자로 흘러간다
 const NUMDOT = {
-  '0':'00111111100,01111111110,11100000111,11000000011,11000000011,11000000011,11000000011,11000000011,11000000011,11000000011,11100000111,01111111110,00111111100',
-  '1':'00110000000,01110000000,11110000000,10110000000,00110000000,00110000000,00110000000,00110000000,00110000000,00110000000,00110000000,11111100000,11111100000',
-  '2':'00111111000,01111111100,11100001110,11000000110,11000001110,00000011100,00000111000,00001110000,00011100000,00111000000,01110000000,11111111110,11111111110',
-  '3':'00111110000,01111111000,11100011100,11000001100,00000011100,00111111000,00111110000,00000111000,00000011100,11000001100,11100011100,01111111000,00111110000',
-  '4':'00000000110,00000001110,00000011110,00000111110,00001110110,00011100110,00111000110,01110000110,11111111111,11111111111,00000000110,00000000110,00000000110',
-  '5':'01111111100,01111111100,11100000000,11000000000,11000000000,11111111000,11111111100,11100001110,00000000110,11000000110,11100001110,01111111100,00111111000',
-  '6':'00111110000,01111111000,11100011100,11000001100,11000000000,11011110000,11111111000,11100011100,11000001100,11000001100,11100011100,01111111000,00111110000',
-  '7':'11111111100,11111111100,00000011000,00000110000,00000110000,00001100000,00001100000,00011000000,00011000000,00011000000,00110000000,00110000000,00110000000',
-  '8':'00111110000,01111111000,11100011100,11000001100,11100011100,01111111000,00111110000,01100011000,11000001100,11000001100,11100011100,01111111000,00111110000',
-  '9':'00111110000,01111111000,11100011100,11000001100,11000001100,11100011100,01111111100,00111101100,00000001100,11000001100,11100011100,01111111000,00111110000',
+  '0': '01110,10001,10001,10001,10001,10001,01110',   // 원본의 가운데 대각선은 뺀다
+  '1': '11100,00100,00100,00100,00100,00100,11111',
+  '2': '01110,10001,00001,00110,01000,10000,11111',
+  '3': '01110,10001,00001,00110,00001,10001,01110',
+  '4': '00010,00110,01010,10010,11111,00010,00010',
+  '5': '11111,10000,10110,11001,00001,10001,01110',
+  '6': '00111,01000,10000,11110,10001,10001,01110',
+  '7': '11111,00001,00001,00010,00100,00100,00100',
+  '8': '01110,10001,10001,01110,10001,10001,01110',
+  '9': '01110,10001,10001,01111,00001,00010,11100',
 };
-const NUMP = 54, NUMR = 27, NUMROWS = 13;        // 격자 간격 · 도트 반지름 · 줄 수 (폰트와 같은 격자)
-const NUMH = 262.76, NUMW = 380;                 // 피그마 숫자 높이 · 상자 폭(두 자리까지 · 가운데 정렬)
-// 글자를 크게 그린 뒤 도트 격자 칸 가운데를 찍어 도트만 뽑는다 (병원 길안내와 같은 방법 = 폰트 그대로 벡터화)
-const NF = 580, NCW = 1200, NFP = NF * .05435, NPEN = 200, NBASE = 950;
-const NCV = document.createElement('canvas'); NCV.width = NCV.height = NCW;
-const ncx = NCV.getContext('2d', { willReadFrequently: true });
-const hasDotFont = () => {
-  ncx.font = `700 100px 'OffBit Dot'`; const a = ncx.measureText('0123456789').width;
-  ncx.font = '700 100px monospace';    return a !== ncx.measureText('0123456789').width;
-};
-// 폰트를 못 쓰는 컴퓨터(배포 링크)에선 같은 모양을 격자 표에서 읽는다
-const dotsFromTable = ch => {
-  const rows = NUMDOT[ch].split(',');
-  let c0 = 99, c1 = -1;
-  rows.forEach(l => [...l].forEach((b, c) => { if (b === '1') { if (c < c0) c0 = c; if (c > c1) c1 = c; } }));
-  const dots = [];
-  rows.forEach((l, r) => [...l].forEach((b, c) => {
-    if (b === '1') dots.push({ x: (c - c0) * NUMP + NUMR, y: r * NUMP + NUMR });
-  }));
-  const w = (c1 - c0 + 1) * NUMP;
-  return { dots, r: NUMR, left: 0, top: 0, h: NUMROWS * NUMP, w, adv: w + NUMP };
-};
+const NUMP = 100, NUMDR = 47, NUMADV = 650;   // 칸 간격 · 도트 반지름 · 글자 보내기
 const NDOTS = {};
-const numDotsFor = ch => {
-  if (NDOTS[ch]) return NDOTS[ch];
-  // 0 은 격자 표에서 : 폰트의 0 은 가운데를 대각선으로 가로지르는 도트가 있어 쓰지 않는다 (격자·간격은 폰트와 같다)
-  if (ch === '0' || !hasDotFont()) return NDOTS[ch] = dotsFromTable(ch);
-  ncx.clearRect(0, 0, NCW, NCW);
-  ncx.font = `700 ${NF}px 'OffBit Dot'`;
-  ncx.textAlign = 'left'; ncx.textBaseline = 'alphabetic'; ncx.fillStyle = '#fff';
-  ncx.fillText(ch, NPEN, NBASE);
-  const adv = ncx.measureText(ch).width;
-  const px = ncx.getImageData(0, 0, NCW, NCW).data;
-  const ink = (x, y) => px[(((y | 0) * NCW) + (x | 0)) * 4 + 3] > 120;
-  let x0 = NCW, x1 = -1, y0 = NCW, y1 = -1;
-  for (let y = 0; y < NCW; y++) for (let x = 0; x < NCW; x++) if (ink(x, y)) {
-    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-  }
-  // 도트는 서로 맞닿아 있어 덩어리로 세면 뭉친다 : 격자 칸 가운데를 찍어 가려낸다
-  const cols = Math.max(1, Math.round((x1 - x0 + 1) / NFP)), rows = Math.max(1, Math.round((y1 - y0 + 1) / NFP));
-  const pw = (x1 - x0 + 1) / cols, ph = (y1 - y0 + 1) / rows, dots = [];
-  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-    const cx = x0 + (i + .5) * pw, cy = y0 + (j + .5) * ph;
-    if (ink(cx, cy)) dots.push({ x: cx - NPEN, y: cy - NBASE });
-  }
-  return NDOTS[ch] = { dots, adv, r: ph * .53, left: x0 - NPEN, top: y0 - NBASE, h: y1 + 1 - y0, w: x1 + 1 - x0 };
-};
-// 캔버스는 글꼴을 미리 불러와야 쓴다 : 준비되면 도트를 다시 뽑아 그린다
-document.fonts.load(`700 ${NF}px 'OffBit Dot'`, '0123456789').then(() => {
-  for (const k of Object.keys(NDOTS)) delete NDOTS[k];
-  const v = numShown; numShown = ''; if (v) setNum(v);
-});
+const numDotsFor = ch => NDOTS[ch] ??= (() => {
+  const rows = NUMDOT[ch].split(',');
+  const dots = [];
+  rows.forEach((line, r) => [...line].forEach((b, c) => {
+    if (b === '1') dots.push({ x: c * NUMP + NUMDR, y: r * NUMP + NUMDR });
+  }));
+  return { dots, r: NUMDR, left: 0, top: 0, adv: NUMADV,
+           w: (rows[0].length - 1) * NUMP + 2 * NUMDR, h: (rows.length - 1) * NUMP + 2 * NUMDR };
+})();
+const NUMH = 262.76, NUMW = 460;   // 피그마 숫자 높이 · 상자 폭(두 자리 '10' 이 433 이라 그보다 넓게 · 가운데 정렬)
 const SVGNS = 'http://www.w3.org/2000/svg';
 const numPool = host => {
   const svg = document.createElementNS(SVGNS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${NUMW} ${NUMH}`);
   host.append(svg);
-  return [...Array(140)].map(() => {   // '10' 은 129 개 ('1' 38 + '0' 91)
+  return [...Array(45)].map(() => {   // '10' 은 32 개 ('1' 13 + '0' 19)
     const c = document.createElementNS(SVGNS, 'circle');
     c.setAttribute('cx', NUMW / 2); c.setAttribute('cy', NUMH / 2); c.setAttribute('r', 3);
     c.style.opacity = 0; svg.append(c); return c;
@@ -775,7 +736,7 @@ const setNum = str => {
   if (str === numShown) return;
   numShown = str;
   const gs = [...str].map(numDotsFor);
-  const ks = gs.map(g => NUMH / g.h);   // 글자마다 제 단위로 (폰트 격자와 표 격자가 섞여도 높이는 같다)
+  const ks = gs.map(g => NUMH / g.h);
   const wid = gs.reduce((a, g, i) => a + (i < gs.length - 1 ? g.adv : g.w) * ks[i], 0);
   let x = (NUMW - wid) / 2 - gs[0].left * ks[0];   // 상자 가운데에
   const pts = [];
