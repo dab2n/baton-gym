@@ -789,18 +789,21 @@ const runReps = (s, n) => {
   const show = () => setNum(String(rep));
   const pull = () => {
     show();
-    const t0 = performance.now(), PULL = 2300, HOLD = 600;   // 천천히 당겼다가 잠깐 버틴다
+    // 랫풀다운 한 번의 속도 : 당김 1.15s + 버팀 0.32s + 놓음 0.18s ≈ 1.65s
+    const t0 = performance.now(), PULL = 1150, HOLD = 320;
     // 피드백 : 그래픽이 아래에서 올라온 뒤(0.7s) 글이 쓰인다
     if (rep === s.feedbackAt) { gym.classList.add('fb'); fbTimer = setTimeout(() => gLabel(gBot, s.feedback, 0), 700); }
     const step = () => {
       const t = performance.now() - t0;
-      const e = Math.min(1, t / PULL), k = Math.pow(e, 1.9);   // 처음엔 천천히, 끝에서 쭉 차오른다
+      const e = Math.min(1, t / PULL);
+      // 앞은 당기기 시작하듯 천천히(절반까지 13%), 뒤에서 쫀득하게 확 차올라 부드럽게 안착
+      const u = e ** 2.1, k = u * u * (3 - 2 * u);
       gNum.style.setProperty('--fill', k.toFixed(3));
       if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
-      if (rep === s.feedbackAt + 1) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다
+      if (rep === s.feedbackAt + 2) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다 (2회 = 3.3s 남긴다)
       if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900); return; }
       gNum.style.setProperty('--fill', 0);
-      gymTimer = setTimeout(pull, 260);
+      gymTimer = setTimeout(pull, 180);
     };
     step();
   };
