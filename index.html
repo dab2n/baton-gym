@@ -327,7 +327,7 @@ body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 .gym.on{ opacity:1; }
 body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
   box-shadow:inset 0 0 130px 8px rgba(246,226,128,.085);   /* 은은하게 : 넓게 퍼지고 아주 옅게 */ opacity:1; background:none; -webkit-mask:none; mask:none; }
-.glab{ position:absolute; left:0; right:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }
+.glab{ position:absolute; left:0; right:0; margin:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }   /* <p> 기본 마진(1em=48px)이 절대 위치 상자를 48 아래로 밀어 숫자와의 간격이 위아래 두 배로 벌어졌다 */
 .gtop{ top:181px; color:rgba(255,255,255,.9); }   /* 노치 아래(78)에서 글자 위까지 110 (피그마 실측) */
 .gbot{ top:908px; color:#fff; }                     /* 글자 밑에서 아래 베젤(1060)까지 111 (피그마 실측) */
 /* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
