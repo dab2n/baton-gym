@@ -336,6 +336,10 @@ body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
   box-shadow:inset 0 0 150px 0 rgba(246,226,128,.04);   /* 아주 은은하게 : 디자인보다 밝고 누렇게 떠 보이지 않게 */ opacity:1; background:none; -webkit-mask:none; mask:none; }
 .glab{ position:absolute; left:0; right:0; margin:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }   /* <p> 기본 마진(1em=48px)이 절대 위치 상자를 48 아래로 밀어 숫자와의 간격이 위아래 두 배로 벌어졌다 */
+.glab.out{ animation:glabOut .3s ease both; }   /* in 애니메이션(both)이 opacity 를 잡고 있어 클래스만으론 안 지워진다 */
+@keyframes glabOut{ to{ opacity:0; translate:0 0; } }
+@keyframes glabIn{ from{ opacity:0; translate:0 26px; } to{ opacity:1; translate:0 0; } }
+.glab.in{ animation:glabIn .55s cubic-bezier(.25,.8,.3,1) both; }
 .gtop{ top:181px; color:rgba(255,255,255,.9); }   /* 노치 아래(78)에서 글자 위까지 110 (피그마 실측) */
 .gbot{ top:908px; color:#fff; }                     /* 글자 밑에서 아래 베젤(1060)까지 111 (피그마 실측) */
 /* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
@@ -774,11 +778,18 @@ const setNum = str => {
 };
 
 // 라벨도 문장과 같은 규칙으로 한 글자씩 (병원 로봇과 통일)
+const gHide = el => { el.classList.remove('in'); el.classList.add('out'); };
 const gLabel = (el, text, delay = 0) => {
   if (el.dataset.t === text) return;
   el.dataset.t = text;
-  el.innerHTML = '<span class="ln">' + text + '</span>';
-  split(el); letters(el, delay, true);
+  clearTimeout(el._lab);
+  const fade = el.textContent.trim() && !el.classList.contains('out') ? 300 : 0;   // 쓰여 있던 글은 먼저 지워진다
+  if (fade) gHide(el);
+  el._lab = setTimeout(() => {
+    el.innerHTML = '<span class="ln">' + text + '</span>';
+    split(el); letters(el, 0, true);
+    el.classList.remove('out', 'in'); void el.offsetWidth; el.classList.add('in');   // 아래에서 위로 올라오며 나타난다
+  }, delay + fade);
 };
 
 let gymRAF, gymTimer, fbTimer;
@@ -804,24 +815,32 @@ const runReps = (s, n) => {
   let rep = 1;
   const show = () => setNum(String(rep));
   const pull = () => {
+    // 한 번의 리듬 : 다음 숫자가 '빈 게이지'로 먼저 뜨고(REST) → 당기고(PULL) → 끝까지 버틴다(HOLD)
+    // 숫자와 게이지를 같은 순간에 바꿔야 가득 찬 4 뒤에 빈 4 가 한 번 더 보이지 않는다
+    gNum.style.setProperty('--fill', 0);
     show();
-    // 랫풀다운 한 번의 속도 : 당김 1.15s + 버팀 0.32s + 놓음 0.18s ≈ 1.65s
-    const t0 = performance.now(), PULL = 1150, HOLD = 320;
-    // 피드백 : 그래픽이 아래에서 올라온 뒤(0.7s) 글이 쓰인다
-    if (rep === s.feedbackAt) { gym.classList.add('fb'); fbTimer = setTimeout(() => gLabel(gBot, s.feedback, 0), 700); }   /* 숫자가 바뀌는 순간 블러 그래픽부터 올라오고, 글은 그 뒤에 쓰인다 */
-    const step = () => {
-      const t = performance.now() - t0;
-      const e = Math.min(1, t / PULL);
-      // 앞은 당기기 시작하듯 천천히(절반까지 13%), 뒤에서 쫀득하게 확 차올라 부드럽게 안착
-      const u = e ** 2.1, k = u * u * (3 - 2 * u);
-      gNum.style.setProperty('--fill', k.toFixed(3));
-      if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
-      if (rep === s.feedbackAt + 2) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다 (2회 = 3.3s 남긴다)
-      if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900); return; }
-      gNum.style.setProperty('--fill', 0);
-      gymTimer = setTimeout(pull, 180);
-    };
-    step();
+    // 피드백 : 그래픽이 아래에서 올라오며 아래 라벨이 지워지고, 0.7s 뒤에 글이 아래에서 슬라이드인
+    if (rep === s.feedbackAt) {
+      gym.classList.add('fb'); gHide(gBot);
+      fbTimer = setTimeout(() => gLabel(gBot, s.feedback, 0), 700);
+    }
+    // 랫풀다운 한 번의 속도 : 쉼 0.4s + 당김 1.15s + 버팀 0.32s ≈ 1.87s
+    const REST = 400, PULL = 1150, HOLD = 320;
+    gymTimer = setTimeout(() => {
+      const t0 = performance.now();
+      const step = () => {
+        const t = performance.now() - t0;
+        const e = Math.min(1, t / PULL);
+        // 앞은 당기기 시작하듯 천천히(절반까지 13%), 뒤에서 쫀득하게 확 차올라 부드럽게 안착
+        const u = e ** 2.1, k = u * u * (3 - 2 * u);
+        gNum.style.setProperty('--fill', k.toFixed(3));
+        if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
+        if (rep === s.feedbackAt + 2) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다 (2회 = 3.7s 남긴다)
+        if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900); return; }
+        pull();
+      };
+      step();
+    }, REST);
   };
   pull();
 };
