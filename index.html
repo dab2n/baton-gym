@@ -579,7 +579,7 @@ const SCENES = [
     text:'Are you ready?', meta:'Neutral Grip · 10 Reps · 3 Sets' },
   { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
   { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
-    top:'Neutral Grip', bottom:'Set 1', feedbackAt:4, feedback:'Pull Slowly..' },
+    top:'Neutral Grip', bottom:'Set 1', feedbackAt:5, feedback:'Pull Slowly..' },
   { look:'bye',    hold:4200, delay:1000, hold1:true, rate:1.4,                // 마무리 인사 → 띠를 지우며 대기 상태로 (병원과 같은 속도·시각)
     text:'Nice set, Leo!' },
 ];
@@ -808,7 +808,7 @@ const runReps = (s, n) => {
     // 랫풀다운 한 번의 속도 : 당김 1.15s + 버팀 0.32s + 놓음 0.18s ≈ 1.65s
     const t0 = performance.now(), PULL = 1150, HOLD = 320;
     // 피드백 : 그래픽이 아래에서 올라온 뒤(0.7s) 글이 쓰인다
-    if (rep === s.feedbackAt) { gym.classList.add('fb'); fbTimer = setTimeout(() => gLabel(gBot, s.feedback, 0), 700); }
+    if (rep === s.feedbackAt) { gym.classList.add('fb'); fbTimer = setTimeout(() => gLabel(gBot, s.feedback, 0), 700); }   /* 숫자가 바뀌는 순간 블러 그래픽부터 올라오고, 글은 그 뒤에 쓰인다 */
     const step = () => {
       const t = performance.now() - t0;
       const e = Math.min(1, t / PULL);
