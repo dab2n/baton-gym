@@ -336,10 +336,10 @@ body.full.cd .sring, body.full.reps .sring{ opacity:0; animation:none; }
 body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
   box-shadow:inset 0 0 150px 0 rgba(246,226,128,.04);   /* 아주 은은하게 : 디자인보다 밝고 누렇게 떠 보이지 않게 */ opacity:1; background:none; -webkit-mask:none; mask:none; }
 .glab{ position:absolute; left:0; right:0; margin:0; text-align:center; font-size:48px; font-weight:500; line-height:1.04; }   /* <p> 기본 마진(1em=48px)이 절대 위치 상자를 48 아래로 밀어 숫자와의 간격이 위아래 두 배로 벌어졌다 */
-.glab.out{ animation:glabOut .3s ease both; }   /* in 애니메이션(both)이 opacity 를 잡고 있어 클래스만으론 안 지워진다 */
-@keyframes glabOut{ to{ opacity:0; translate:0 0; } }
-@keyframes glabIn{ from{ opacity:0; translate:0 26px; } to{ opacity:1; translate:0 0; } }
-.glab.in{ animation:glabIn .55s cubic-bezier(.25,.8,.3,1) both; }
+.glab.out{ animation:glabOut .75s cubic-bezier(.4,0,.5,1) both; }   /* in 애니메이션(both)이 opacity 를 잡고 있어 클래스만으론 안 지워진다 */
+@keyframes glabOut{ to{ opacity:0; translate:0 -14px; filter:blur(6px); } }
+@keyframes glabIn{ from{ opacity:0; translate:0 26px; filter:blur(7px); } to{ opacity:1; translate:0 0; filter:blur(0); } }
+.glab.in{ animation:glabIn .85s cubic-bezier(.22,.7,.25,1) both; }
 .gbot{ top:894px; color:#fff; }   /* 피그마 1488:249 : 'Pull Slowly..' 글자 밑이 964 (54px · 행간 1.04) */
 /* ---------- SET 1 · 양손 무게 게이지 · 전체 진행도 (피그마 1488:224 / 1488:249) ---------- */
 .gset{ position:absolute; left:0; right:0; top:114.7px; margin:0; text-align:center;
@@ -349,11 +349,12 @@ body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:
 .gset{ opacity:0; transition:opacity .8s ease; }
 body.reps .ggauge, body.reps .gset{ opacity:1; }   /* 카운팅 장면에서만 (카운트다운엔 없다) */
 .ggauge path{ fill:none; stroke-width:15.9; stroke-linecap:round; }   /* 16.5 x 0.963 */
-.pfil{ stroke:#fff; }
-.pdot{ fill:#fff; filter:drop-shadow(0 0 7px rgba(255,255,255,.5)); }
+.pfil{ stroke:url(#pfg); filter:blur(1.9px); }   /* 피그마 : #FFF5D3 .61 → #fff .8 · 흐림 2 */
+.pdot{ fill:#fffdf6; }
+.pdot{ filter:drop-shadow(0 0 5.5px rgba(255,245,211,.55)); }
 .gwt circle{ fill:#fff; opacity:.72; }           /* 무게 숫자(도트) */
 /* 피드백이 뜨면 배경 그래픽은 뒤로 물러난다 (피그마 : 밝기 약 30% · 흐림) */
-.gym.fb .ggauge{ opacity:.62; filter:blur(2px); }      /* 숫자는 31% (피그마 실측) */
+.gym.fb .ggauge{ opacity:.62; }      /* 숫자는 31% (피그마 실측) */
 .gym.fb .ggauge path, .gym.fb .pdot{ opacity:.22; }                      /* 호는 한 겹 더 물러난다 (18%) */
 .ggauge path{ transition:opacity .8s ease; }
 /* ---------- 운동 칩 (피그마 1031:309 / 1031:375) ----------
@@ -391,36 +392,54 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
   --m1:calc(var(--fill, 0) * 120% - 20%); --m2:calc(var(--fill, 0) * 120% - 11%); --m3:calc(var(--fill, 0) * 120%);
   -webkit-mask-image:linear-gradient(0deg, #000 0, #000 var(--m1), rgba(0,0,0,.45) var(--m2), transparent var(--m3));
           mask-image:linear-gradient(0deg, #000 0, #000 var(--m1), rgba(0,0,0,.45) var(--m2), transparent var(--m3)); }
-/* 피드백 : 아래쪽에서 번지는 빛과 함께 조언이 떠올랐다가, 자세가 돌아오면 사라진다 */
-.gfb{ position:absolute; inset:0; opacity:0; translate:0 22%;
-  transition:opacity .8s ease, translate .9s cubic-bezier(.25,.8,.3,1); }   /* 아래에서 올라오며 나타난다 */
-.gym.fb .gfb{ translate:0 0; }
-/* 하단 빛 : 피그마 1488:249 의 세 겹을 그대로 (파랑 한 겹 + 따뜻한 두 겹 + 아래 테두리 안쪽 그림자)
-   좌표·크기·흐림은 피그마 프레임(스크린 1080)을 이 UI(1040)로 0.963 배 옮긴 값 */
-.gfb i{ position:absolute; display:block; border-radius:50%; }
+/* ---------- 피드백 : 아래에서 숨 쉬듯 떠오르는 빛 (피그마 1488:249) ----------
+   보이스 UI 처럼 세 겹이 서로 다른 박자로 느리게 흘러 한 번도 멈춰 서 있지 않다.
+   들어올 때는 아래에서 번지며 올라오고, 나갈 때는 그 자리에서 천천히 사그라든다(튀는 순간 없이) */
+.gfb{ position:absolute; inset:0; opacity:0; translate:0 16%; scale:1 .94; transform-origin:50% 100%;
+  transition:opacity 1.1s cubic-bezier(.3,0,.4,1), translate 1.2s cubic-bezier(.22,.7,.25,1), scale 1.2s cubic-bezier(.22,.7,.25,1); }
+.gym.fb .gfb{ opacity:1; translate:0 0; scale:1 1; }
+.gfb i{ position:absolute; display:block; border-radius:50%; will-change:transform; }
 .gfb .b1{ left:73.9px; top:828px; width:835.9px; height:246px; rotate:1.94deg;
-  background:linear-gradient(164.9deg, rgba(1,1,1,.6) 3%, #274EB8 63%);
-  filter:blur(15.7px); -webkit-backdrop-filter:blur(3.9px); backdrop-filter:blur(3.9px); }
+  background:linear-gradient(164.9deg, rgba(1,1,1,.6) 3%, #274EB8 63%); filter:blur(15.7px);
+  animation:fbWobA 7.4s ease-in-out infinite; }
 .gfb .b2{ left:571.6px; top:783.3px; width:332.2px; height:173.3px; rotate:-15.31deg; opacity:.3;
-  background:linear-gradient(248.9deg, #FFEDAD 22%, rgba(225,224,220,0) 100%); filter:blur(38.5px); }
+  background:linear-gradient(248.9deg, #FFEDAD 22%, rgba(225,224,220,0) 100%); filter:blur(38.5px);
+  animation:fbWobB 9.1s ease-in-out infinite; }
 .gfb .b3{ left:269.4px; top:908.8px; width:537.4px; height:282.2px; rotate:-5.4deg; opacity:.3;
-  background:linear-gradient(248.9deg, #FFEDAD 22%, rgba(225,224,220,0) 100%); filter:blur(38.5px); }
+  background:linear-gradient(248.9deg, #FFEDAD 22%, rgba(225,224,220,0) 100%); filter:blur(38.5px);
+  animation:fbWobC 6.3s ease-in-out infinite; }
 .gfb::after{ content:''; position:absolute; inset:20px; border-radius:50%; pointer-events:none;
-  box-shadow:inset 0 -50px 65.5px -21px rgba(183,228,255,.7); }   /* 스크린 테두리(반지름 520)를 따라 */
-.gym.fb .gfb .b1{ animation:fbWobA 5.4s ease-in-out infinite; }
-.gym.fb .gfb .b3{ animation:fbWobB 4.1s ease-in-out infinite; }
+  box-shadow:inset 0 -50px 65.5px -21px rgba(183,228,255,.7);
+  animation:fbBreath 5.6s ease-in-out infinite; }   /* 스크린 테두리(반지름 520)를 따라 숨 쉰다 */
+/* 일렁임은 늘 돌아간다 : 피드백이 꺼질 때 멈춰 서며 도형이 드러나던 것(노란 원)이 없어진다 */
 @keyframes fbWobA{
-  0%, 100%{ translate:0 0; scale:1 1; }
-  28%     { translate:-18px -8px; scale:1.07 .95; }
-  55%     { translate:12px 5px;   scale:.96 1.06; }
-  78%     { translate:-7px 3px;   scale:1.03 .99; }
+  0%, 100%{ translate:0 0;        scale:1 1; }
+  26%     { translate:-26px -10px; scale:1.06 .94; }
+  52%     { translate:18px 7px;    scale:.95 1.07; }
+  76%     { translate:-10px 4px;   scale:1.04 .98; }
 }
 @keyframes fbWobB{
-  0%, 100%{ translate:0 0; scale:1 1; }
-  33%     { translate:16px 6px;  scale:.94 1.08; }
-  61%     { translate:-12px -5px; scale:1.08 .96; }
+  0%, 100%{ translate:0 0;       scale:1 1;   }
+  31%     { translate:22px 9px;   scale:.92 1.1; }
+  58%     { translate:-16px -7px; scale:1.1 .93; }
+  81%     { translate:9px -4px;   scale:.97 1.04; }
 }
-.gym.fb .gfb{ opacity:1; }
+@keyframes fbWobC{
+  0%, 100%{ translate:0 0;        scale:1 1;   }
+  29%     { translate:-14px 8px;   scale:1.07 .96; }
+  61%     { translate:17px -6px;   scale:.94 1.06; }
+}
+@keyframes fbBreath{ 0%, 100%{ opacity:.82; } 50%{ opacity:1; } }
+/* 배경은 아래로 갈수록 더 흐려진다 (피그마 progressive blur) */
+.gpb{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .9s ease; }
+.gym.fb .gpb{ opacity:1; }
+.gpb i{ position:absolute; inset:0; display:block; }
+.gpb .p1{ -webkit-backdrop-filter:blur(2px);  backdrop-filter:blur(2px);
+  -webkit-mask:linear-gradient(180deg, transparent 66%, #000 80%); mask:linear-gradient(180deg, transparent 66%, #000 80%); }
+.gpb .p2{ -webkit-backdrop-filter:blur(5px);  backdrop-filter:blur(5px);
+  -webkit-mask:linear-gradient(180deg, transparent 76%, #000 89%); mask:linear-gradient(180deg, transparent 76%, #000 89%); }
+.gpb .p3{ -webkit-backdrop-filter:blur(11px); backdrop-filter:blur(11px);
+  -webkit-mask:linear-gradient(180deg, transparent 86%, #000 97%); mask:linear-gradient(180deg, transparent 86%, #000 97%); }
 
 /* 반응이 없으면(15s) 또는 사람이 보이지 않으면(4s) 문구가 아래로 빠지며 기본 화면으로 (병원과 같다) */
 body.fill.leave .stage > *{ translate:0 110px; opacity:0;
@@ -576,13 +595,12 @@ body.fill.leave .stage > *{ translate:0 110px; opacity:0;
     </div>
 
     <div class="gym" aria-hidden="true">
-      <div class="gfb"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
-      <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
       <svg class="ggauge" viewBox="0 0 1080 1080" aria-hidden="true">
         <defs>
           <linearGradient id="glg" gradientUnits="userSpaceOnUse"></linearGradient>
           <linearGradient id="grg" gradientUnits="userSpaceOnUse"></linearGradient>
           <linearGradient id="gpg" gradientUnits="userSpaceOnUse"></linearGradient>
+          <linearGradient id="pfg" gradientUnits="userSpaceOnUse"></linearGradient>
         </defs>
         <path class="garc l" stroke="url(#glg)"></path>
         <path class="garc r" stroke="url(#grg)"></path>
@@ -591,6 +609,10 @@ body.fill.leave .stage > *{ translate:0 110px; opacity:0;
         <circle class="pdot" r="13.3"></circle>
         <g class="gwt l"></g><g class="gwt r"></g>
       </svg>
+      <!-- 게이지 위로 : 아래로 갈수록 세지는 배경 흐림 → 빛 → 숫자·문구는 선명하게 -->
+      <div class="gpb" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i></div>
+      <div class="gfb"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+      <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
       <p class="gset" aria-hidden="true">SET <span class="n">1</span></p>
       <div class="xchip next" aria-hidden="true"><span class="xnm"></span></div>
       <div class="xchip now"  aria-hidden="true"><span class="xnm"></span></div>
@@ -898,7 +920,14 @@ const setWeights = (l, r, fl, fr) => {
 const setProgress = p => {   // 0~1
   const [a0, a1] = GAUGE.prog, a = a0 + (a1 - a0) * p;
   gq('.pfil').setAttribute('d', p > 0.001 ? arcPath(a0, a) : '');
-  const [x, y] = polar(a);
+  const [x0, y0] = polar(a0), [x, y] = polar(a);
+  const g = gauge.querySelector('#pfg');   // 꼬리는 옅은 노랑, 머리는 흰빛 (피그마)
+  g.setAttribute('x1', x0); g.setAttribute('y1', y0); g.setAttribute('x2', x); g.setAttribute('y2', y);
+  g.replaceChildren(...[['#FFE9B0', .5, 0], ['#FFF6DC', .78, .55], ['#ffffff', .92, 1]].map(([c, o, off]) => {
+    const st = document.createElementNS(SVGNS, 'stop');
+    st.setAttribute('offset', off); st.setAttribute('stop-color', c); st.setAttribute('stop-opacity', o);
+    return st;
+  }));
   gq('.pdot').setAttribute('cx', x.toFixed(2)); gq('.pdot').setAttribute('cy', y.toFixed(2));
 };
 
