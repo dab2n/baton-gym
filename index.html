@@ -340,27 +340,38 @@ body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:
 @keyframes glabOut{ to{ opacity:0; translate:0 0; } }
 @keyframes glabIn{ from{ opacity:0; translate:0 26px; } to{ opacity:1; translate:0 0; } }
 .glab.in{ animation:glabIn .55s cubic-bezier(.25,.8,.3,1) both; }
-.gbot{ top:924px; color:#fff; }   /* 피그마 1031:309 : 'Set 1' 글자 밑이 974 (48px · 행간 1.04) */
+.gbot{ top:892px; color:#fff; }   /* 피그마 1488:249 : 'Pull Slowly..' 글자 밑이 964 (54px · 행간 1.04) */
+/* ---------- SET 1 · 양손 무게 게이지 · 전체 진행도 (피그마 1488:224 / 1488:249) ---------- */
+.gset{ position:absolute; left:0; right:0; top:98px; margin:0; text-align:center;
+  font-size:34px; font-weight:500; line-height:1.04; color:rgba(255,255,255,.8); }
+.ggauge{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none;
+  opacity:0; transition:opacity .8s ease, filter .8s ease; }
+.gset{ opacity:0; transition:opacity .8s ease; }
+body.reps .ggauge, body.reps .gset{ opacity:1; }   /* 카운팅 장면에서만 (카운트다운엔 없다) */
+.ggauge path{ fill:none; stroke-width:16.5; stroke-linecap:round; }
+.gtrk{ stroke:rgba(255,255,255,.15); }
+.ptrk{ stroke:rgba(255,255,255,.10); }   /* 남은 쪽 */
+.gfil, .pfil{ stroke:#fff; }                    /* 찬 쪽 */
+.pdot{ fill:#fff; filter:drop-shadow(0 0 7px rgba(255,255,255,.5)); }
+.gwt circle{ fill:#fff; opacity:.72; }           /* 무게 숫자(도트) */
+/* 피드백이 뜨면 배경 그래픽은 뒤로 물러난다 (피그마 : 밝기 약 30% · 흐림) */
+.gym.fb .ggauge{ opacity:.62; filter:blur(2px); }      /* 숫자는 31% (피그마 실측) */
+.gym.fb .ggauge path, .gym.fb .pdot{ opacity:.22; }                      /* 호는 한 겹 더 물러난다 (18%) */
+.ggauge path{ transition:opacity .8s ease; }
 /* ---------- 운동 칩 (피그마 1031:309 / 1031:375) ----------
    지금 하는 운동이 칩으로 뜨고, 다음 운동이 그 뒤에 작게 겹쳐 비친다 */
 .xchip{ position:absolute; left:50%; translate:-50% 0; display:flex; align-items:center;
   white-space:nowrap; font-weight:400; line-height:1.04; opacity:0; }
-.xchip .xno{ display:flex; align-items:flex-end; }
-.xchip .xno svg{ display:block; overflow:visible; }
-.xchip .xno circle{ fill:currentColor; }
-.xchip.now{ top:152px; z-index:2; gap:16px; padding:16px 40px 18px 32px; border-radius:90px;
-  font-size:42px; color:rgba(255,255,255,.9);
+.xchip.now{ top:166px; z-index:2; padding:16px 40px 18px 32px; border-radius:90px;
+  font-size:38px; color:rgba(255,255,255,.9);
   background:radial-gradient(271px 66px at 50% 32%, rgba(30,37,54,.8) 61%, rgba(36,56,94,.48) 90%);
   box-shadow:0 18px 25.4px rgba(8,11,20,.8);
   -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
-.xchip.next{ top:209px; z-index:1; gap:10.54px; padding:10.54px 26.35px 11.86px 21.08px; border-radius:60.44px;
-  font-size:32.23px; color:rgba(255,255,255,.6); background:#2b2f3a; }
-.xchip.now .xno svg{ height:30.737px; width:auto; }
-.xchip.next .xno svg{ height:22.576px; width:auto; }
+.xchip.next{ top:223px; z-index:1; padding:10.54px 26.35px 11.86px 21.08px; border-radius:60.44px;
+  font-size:30px; color:rgba(255,255,255,.6); background:#2b2f3a; }
 @keyframes xchipIn{ from{ opacity:0; translate:-50% -70px; } to{ opacity:1; translate:-50% 0; } }
-.gym.on .xchip.now { animation:xchipIn .7s cubic-bezier(.22,.7,.25,1) .15s both; }
-.gym.on .xchip.next{ animation:xchipIn .7s cubic-bezier(.22,.7,.25,1) .35s both; opacity:.4; }
-.gym.on .xchip.next{ animation-name:xchipNext; }
+body.reps .xchip.now { animation:xchipIn .7s cubic-bezier(.22,.7,.25,1) .15s both; }
+body.reps .xchip.next{ animation:xchipNext .7s cubic-bezier(.22,.7,.25,1) .35s both; }
 @keyframes xchipNext{ from{ opacity:0; translate:-50% -70px; } to{ opacity:.4; translate:-50% 0; } }
 /* 피드백 문구 : 아래 빛 위에 겹쳐(overlay) 푸른 기운을 머금는다 (피그마 1031:375 · 두 겹) */
 .gym.fb .gbot{ font-size:54px; }
@@ -389,8 +400,8 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
 .gfb::before, .gfb::after{ content:''; position:absolute; inset:0; }
 /* 피그마 1031:375 의 흐린 타원 세 겹 : 넓게 깔린 파랑 + 아래 테두리를 밝히는 파랑 + 오른쪽 따뜻한 기운 */
 .gfb::before{ background:
-  radial-gradient(580px 180px at 541px 1105px, rgba(183,228,255,.86) 0%, rgba(104,152,238,.82) 48%, rgba(20,40,110,0) 86%),
-  radial-gradient(650px 138px at 556px 985px, rgba(61,103,207,.84) 0%, rgba(34,62,150,.72) 48%, rgba(16,26,66,0) 86%);
+  radial-gradient(660px 185px at 541px 1080px, rgba(183,228,255,.86) 0%, rgba(104,152,238,.82) 48%, rgba(20,40,110,0) 86%),
+  radial-gradient(740px 150px at 556px 962px, rgba(61,103,207,.84) 0%, rgba(34,62,150,.72) 48%, rgba(16,26,66,0) 86%);
   filter:blur(28px); }
 .gfb::after { background:radial-gradient(172px 90px at 764px 924px, rgba(226,196,120,.75), rgba(226,196,120,0) 70%); opacity:.3; filter:blur(40px); }
 .gfb{ border-radius:50%; box-shadow:inset 0 -52px 68.7px -22px rgba(183,228,255,.45); }   /* 아래 테두리를 따라 번지는 푸른 흰빛 */
@@ -566,8 +577,15 @@ body.fill.leave .stage > *{ translate:0 110px; opacity:0;
     <div class="gym" aria-hidden="true">
       <div class="gfb"></div>
       <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
-      <div class="xchip next" aria-hidden="true"><span class="xno"></span><span class="xnm"></span></div>
-      <div class="xchip now"  aria-hidden="true"><span class="xno"></span><span class="xnm"></span></div>
+      <svg class="ggauge" viewBox="0 0 1080 1080" aria-hidden="true">
+        <path class="gtrk l"></path><path class="gtrk r"></path><path class="ptrk"></path>
+        <path class="gfil l"></path><path class="gfil r"></path><path class="pfil"></path>
+        <circle class="pdot" r="13.3"></circle>
+        <g class="gwt l"></g><g class="gwt r"></g>
+      </svg>
+      <p class="gset" aria-hidden="true">SET <span class="n">1</span></p>
+      <div class="xchip next" aria-hidden="true"><span class="xnm"></span></div>
+      <div class="xchip now"  aria-hidden="true"><span class="xnm"></span></div>
       <p class="glab gbot"></p>
     </div>
     <div class="stage"></div>
@@ -613,7 +631,7 @@ const SCENES = [
     text:'Are you ready?', meta:'Neutral Grip · 10 Reps · 3 Sets' },
   { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
   { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
-    top:'Neutral Grip', exno:'01', next:'One Arm', nextno:'02', bottom:'Set 1', feedbackAt:5, feedback:'Pull Slowly..' },
+    top:'Neutral Grip', next:'One Arm', set:'1', wl:'5.2', wr:'4.8', fl:.59, fr:.43, feedbackAt:5, feedback:'Pull Slowly..' },
   { look:'bye',    hold:4200, delay:1000, hold1:true, rate:1.4,                // 마무리 인사 → 띠를 지우며 대기 상태로 (병원과 같은 속도·시각)
     text:'Nice set, Leo!' },
 ];
@@ -741,6 +759,7 @@ const letters = (el, t, hold1, rate = 1) => {
 const gym = document.querySelector('.gym');
 const gBot = gym.querySelector('.gbot');
 const xNow = gym.querySelector('.xchip.now'), xNext = gym.querySelector('.xchip.next');
+const gSet = gym.querySelector('.gset .n');
 const gPale = gym.querySelector('.pale'), gFill = gym.querySelector('.fillz');
 const gNum = gym.querySelector('.gnum');
 // 숫자 도트 : DGM Composta Trial Regular (fonts.xyz 체험판) 의 5x7 격자를 그대로 옮겨 적었다.
@@ -808,28 +827,56 @@ const setNum = str => {
   });
 };
 
-// 칩의 운동 번호 : 같은 도트 표로 그린다. 자간은 피그마 실측(글자 보내기 555 · 마침표 180 뒤)
-const XADV = 555, XGAP = 180;
-const dotNumSvg = str => {
-  const svg = document.createElementNS(SVGNS, 'svg');
-  const pts = []; let x = 0;
-  for (const ch of str) {
-    for (const d of numDotsFor(ch).dots) pts.push([x + d.x, d.y]);
-    x += XADV;
-  }
-  pts.push([Math.max(...pts.map(p => p[0])) + XGAP, 6 * NUMP + NUMDR]);   // 마침표
-  const w = Math.max(...pts.map(p => p[0])) + NUMDR, h = 6 * NUMP + 2 * NUMDR;
-  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-  for (const [cx, cy] of pts) {
-    const c = document.createElementNS(SVGNS, 'circle');
-    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', NUMDR);
-    svg.append(c);
-  }
-  return svg;
+const setChip = (el, name) => { el.querySelector('.xnm').textContent = name; };
+
+/* ---------- 게이지 (피그마 1488:224 실측) ----------
+   가운데 (540,540) · 반지름 487 · 굵기 16.5 · 둥근 끝
+   왼손 무게 : 128°(아래) → 177°(위, 숫자 자리) · 오른손 : 52° → 3° · 전체 진행도 : 112° → 57°
+   무게는 아래에서 위로 차고, 진행도는 왼쪽에서 오른쪽으로 찬다 (끝에 빛나는 점) */
+const GR = 487, GC = 540;
+const GAUGE = { lw:[126,175], rw:[54,5], prog:[113.8,57] };   // 왼손 · 오른손 · 전체 진행도 (각도는 피그마 실측)
+const polar = a => [GC + GR * Math.cos(a * Math.PI / 180), GC + GR * Math.sin(a * Math.PI / 180)];
+const arcPath = (a0, a1) => {
+  const [x0, y0] = polar(a0), [x1, y1] = polar(a1);
+  const d = a1 - a0;
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${GR} ${GR} 0 ${Math.abs(d) > 180 ? 1 : 0} ${d > 0 ? 1 : 0} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
 };
-const setChip = (el, no, name) => {
-  el.querySelector('.xno').replaceChildren(dotNumSvg(no));
-  el.querySelector('.xnm').textContent = name;
+const gauge = gym.querySelector('.ggauge');
+const gq = c => gauge.querySelector(c);
+gq('.gtrk.l').setAttribute('d', arcPath(...GAUGE.lw));
+gq('.gtrk.r').setAttribute('d', arcPath(...GAUGE.rw));
+gq('.ptrk').setAttribute('d', arcPath(...GAUGE.prog));
+// 무게 숫자(도트) : 피그마 실측 자리에 그대로 (잉크 높이 26 · 왼쪽 5.2 / 오른쪽 4.8)
+const WK = 26 / (6 * NUMP + 2 * NUMDR);   // 도트 한 칸 크기
+const dotNumAt = (g, str, centers, baseTop) => {
+  const kids = [];
+  [...str].forEach((ch, i) => {
+    if (ch === '.') {
+      const c = document.createElementNS(SVGNS, 'circle');
+      c.setAttribute('cx', centers[i]); c.setAttribute('cy', baseTop + (6 * NUMP + NUMDR) * WK);
+      c.setAttribute('r', NUMDR * WK); kids.push(c); return;
+    }
+    for (const d of numDotsFor(ch).dots) {
+      const c = document.createElementNS(SVGNS, 'circle');
+      c.setAttribute('cx', (centers[i] + (d.x - (4 * NUMP + 2 * NUMDR) / 2) * WK).toFixed(2));
+      c.setAttribute('cy', (baseTop + d.y * WK).toFixed(2));
+      c.setAttribute('r', (NUMDR * WK).toFixed(2)); kids.push(c);
+    }
+  });
+  g.replaceChildren(...kids);
+};
+const setWeights = (l, r, fl, fr) => {
+  dotNumAt(gq('.gwt.l'), [...l].join(''), [51.67, 67.85, 85.91], 527);
+  dotNumAt(gq('.gwt.r'), [...r].join(''), [993.2, 1010.02, 1026.8], 527);
+  const f = (frac, [a0, a1]) => arcPath(a0, a0 + (a1 - a0) * frac);
+  gq('.gfil.l').setAttribute('d', f(fl, GAUGE.lw));
+  gq('.gfil.r').setAttribute('d', f(fr, GAUGE.rw));
+};
+const setProgress = p => {   // 0~1
+  const [a0, a1] = GAUGE.prog, a = a0 + (a1 - a0) * p;
+  gq('.pfil').setAttribute('d', p > 0.001 ? arcPath(a0, a) : '');
+  const [x, y] = polar(a);
+  gq('.pdot').setAttribute('cx', x.toFixed(2)); gq('.pdot').setAttribute('cy', y.toFixed(2));
 };
 
 // 라벨도 문장과 같은 규칙으로 한 글자씩 (병원 로봇과 통일)
@@ -866,8 +913,9 @@ const runCountdown = n => {
 // 카운팅 : 1 부터. 당길수록 옅은 숫자가 아래에서 위로 흰색으로 차고, 다 차면 다음 숫자로
 const runReps = (s, n) => {
   gym.className = 'gym on';
-  setChip(xNow, s.exno, s.top); setChip(xNext, s.nextno, s.next);
-  gLabel(gBot, s.bottom, 500);
+  setChip(xNow, s.top); setChip(xNext, s.next);
+  setWeights(s.wl, s.wr, s.fl, s.fr); setProgress(0);
+  gSet.textContent = s.set;
   let rep = 1;
   const show = () => setNum(String(rep));
   const pull = () => {
@@ -891,7 +939,8 @@ const runReps = (s, n) => {
         const u = e ** 2.1, k = u * u * (3 - 2 * u);
         gNum.style.setProperty('--fill', k.toFixed(3));
         if (t < PULL + HOLD) { gymRAF = requestAnimationFrame(step); return; }
-        if (rep === s.feedbackAt + 2) { gym.classList.remove('fb'); gLabel(gBot, s.bottom, 150); }   // 자세가 돌아오면 사라진다 (2회 = 3.7s 남긴다)
+        if (rep === s.feedbackAt + 2) { gym.classList.remove('fb'); gHide(gBot); gBot.dataset.t = ''; }   // 자세가 돌아오면 사라진다 (2회 = 3.7s 남긴다)
+        setProgress(rep / s.reps);   // 한 회를 채울 때마다 아래 진행도가 간다
         if (rep++ >= s.reps) { gymTimer = setTimeout(() => go(n + 1 >= SCENES.length ? 0 : n + 1), 900); return; }
         pull();
       };
