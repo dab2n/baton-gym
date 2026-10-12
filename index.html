@@ -340,18 +340,16 @@ body.reps .screen::after{ content:''; position:absolute; inset:0; border-radius:
 @keyframes glabOut{ to{ opacity:0; translate:0 0; } }
 @keyframes glabIn{ from{ opacity:0; translate:0 26px; } to{ opacity:1; translate:0 0; } }
 .glab.in{ animation:glabIn .55s cubic-bezier(.25,.8,.3,1) both; }
-.gbot{ top:892px; color:#fff; }   /* 피그마 1488:249 : 'Pull Slowly..' 글자 밑이 964 (54px · 행간 1.04) */
+.gbot{ top:894px; color:#fff; }   /* 피그마 1488:249 : 'Pull Slowly..' 글자 밑이 964 (54px · 행간 1.04) */
 /* ---------- SET 1 · 양손 무게 게이지 · 전체 진행도 (피그마 1488:224 / 1488:249) ---------- */
-.gset{ position:absolute; left:0; right:0; top:98px; margin:0; text-align:center;
-  font-size:34px; font-weight:500; line-height:1.04; color:rgba(255,255,255,.8); }
+.gset{ position:absolute; left:0; right:0; top:114.7px; margin:0; text-align:center;
+  font-size:32.7px; font-weight:500; line-height:1.04; color:rgba(255,255,255,.8); }
 .ggauge{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none;
   opacity:0; transition:opacity .8s ease, filter .8s ease; }
 .gset{ opacity:0; transition:opacity .8s ease; }
 body.reps .ggauge, body.reps .gset{ opacity:1; }   /* 카운팅 장면에서만 (카운트다운엔 없다) */
-.ggauge path{ fill:none; stroke-width:16.5; stroke-linecap:round; }
-.gtrk{ stroke:rgba(255,255,255,.15); }
-.ptrk{ stroke:rgba(255,255,255,.10); }   /* 남은 쪽 */
-.gfil, .pfil{ stroke:#fff; }                    /* 찬 쪽 */
+.ggauge path{ fill:none; stroke-width:15.9; stroke-linecap:round; }   /* 16.5 x 0.963 */
+.pfil{ stroke:#fff; }
 .pdot{ fill:#fff; filter:drop-shadow(0 0 7px rgba(255,255,255,.5)); }
 .gwt circle{ fill:#fff; opacity:.72; }           /* 무게 숫자(도트) */
 /* 피드백이 뜨면 배경 그래픽은 뒤로 물러난다 (피그마 : 밝기 약 30% · 흐림) */
@@ -362,20 +360,20 @@ body.reps .ggauge, body.reps .gset{ opacity:1; }   /* 카운팅 장면에서만 
    지금 하는 운동이 칩으로 뜨고, 다음 운동이 그 뒤에 작게 겹쳐 비친다 */
 .xchip{ position:absolute; left:50%; translate:-50% 0; display:flex; align-items:center;
   white-space:nowrap; font-weight:400; line-height:1.04; opacity:0; }
-.xchip.now{ top:166px; z-index:2; padding:16px 40px 18px 32px; border-radius:90px;
-  font-size:38px; color:rgba(255,255,255,.9);
+.xchip.now{ top:179.9px; z-index:2; padding:15.4px 38.5px 17.3px 30.8px; border-radius:86.7px;
+  font-size:36.6px; color:rgba(255,255,255,.9);
   background:radial-gradient(271px 66px at 50% 32%, rgba(30,37,54,.8) 61%, rgba(36,56,94,.48) 90%);
   box-shadow:0 18px 25.4px rgba(8,11,20,.8);
   -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
-.xchip.next{ top:223px; z-index:1; padding:10.54px 26.35px 11.86px 21.08px; border-radius:60.44px;
-  font-size:30px; color:rgba(255,255,255,.6); background:#2b2f3a; }
+.xchip.next{ top:234.7px; z-index:1; padding:10.15px 25.38px 11.42px 20.3px; border-radius:58.2px;
+  font-size:28.9px; color:rgba(255,255,255,.6); background:#2b2f3a; }
 @keyframes xchipIn{ from{ opacity:0; translate:-50% -70px; } to{ opacity:1; translate:-50% 0; } }
 body.reps .xchip.now { animation:xchipIn .7s cubic-bezier(.22,.7,.25,1) .15s both; }
 body.reps .xchip.next{ animation:xchipNext .7s cubic-bezier(.22,.7,.25,1) .35s both; }
 @keyframes xchipNext{ from{ opacity:0; translate:-50% -70px; } to{ opacity:.4; translate:-50% 0; } }
 /* 피드백 문구 : 아래 빛 위에 겹쳐(overlay) 푸른 기운을 머금는다 (피그마 1031:375 · 두 겹) */
-.gym.fb .gbot{ font-size:54px; }
-.gym.fb .gbot .c{ background:linear-gradient(90deg,#7fb9f2 0%,#8ab0e4 52%,#5e8ed6 100%);
+.gym.fb .gbot{ font-size:52px; }
+.gym.fb .gbot .c{ background:linear-gradient(90deg,#6ea4e6 0%,#93c4f2 55%,#88caf7 100%);
   -webkit-background-clip:text; background-clip:text; color:transparent; }   /* 아래 빛에 겹친 색을 실측해 그대로 */
 /* 숫자는 폰트가 아니라 도트를 직접 그린다(JS setNum) : 상자 크기 = 도트가 실제로 차지하는 범위라
    left/top 50% 만으로 좌우·위아래가 정확히 가운데에 온다 (글자 상자 기준 정렬의 쏠림이 없다) */
@@ -397,15 +395,20 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
 .gfb{ position:absolute; inset:0; opacity:0; translate:0 22%;
   transition:opacity .8s ease, translate .9s cubic-bezier(.25,.8,.3,1); }   /* 아래에서 올라오며 나타난다 */
 .gym.fb .gfb{ translate:0 0; }
-.gfb::before, .gfb::after{ content:''; position:absolute; inset:0; }
-/* 피그마 1031:375 의 흐린 타원 세 겹 : 넓게 깔린 파랑 + 아래 테두리를 밝히는 파랑 + 오른쪽 따뜻한 기운 */
-.gfb::before{ background:
-  radial-gradient(660px 185px at 541px 1080px, rgba(183,228,255,.86) 0%, rgba(104,152,238,.82) 48%, rgba(20,40,110,0) 86%),
-  radial-gradient(740px 150px at 556px 962px, rgba(61,103,207,.84) 0%, rgba(34,62,150,.72) 48%, rgba(16,26,66,0) 86%);
-  filter:blur(28px); }
-.gfb::after { background:radial-gradient(172px 90px at 764px 924px, rgba(226,196,120,.75), rgba(226,196,120,0) 70%); opacity:.3; filter:blur(40px); }
-.gfb{ border-radius:50%; box-shadow:inset 0 -52px 68.7px -22px rgba(183,228,255,.45); }   /* 아래 테두리를 따라 번지는 푸른 흰빛 */
-/* 보이스 ui 처럼 숨쉬듯 일렁인다 : 두 겹이 서로 다른 박자로 흔들려 물결처럼 보인다 */
+/* 하단 빛 : 피그마 1488:249 의 세 겹을 그대로 (파랑 한 겹 + 따뜻한 두 겹 + 아래 테두리 안쪽 그림자)
+   좌표·크기·흐림은 피그마 프레임(스크린 1080)을 이 UI(1040)로 0.963 배 옮긴 값 */
+.gfb i{ position:absolute; display:block; border-radius:50%; }
+.gfb .b1{ left:73.9px; top:828px; width:835.9px; height:246px; rotate:1.94deg;
+  background:linear-gradient(164.9deg, rgba(1,1,1,.6) 3%, #274EB8 63%);
+  filter:blur(15.7px); -webkit-backdrop-filter:blur(3.9px); backdrop-filter:blur(3.9px); }
+.gfb .b2{ left:571.6px; top:783.3px; width:332.2px; height:173.3px; rotate:-15.31deg; opacity:.3;
+  background:linear-gradient(248.9deg, #FFEDAD 22%, rgba(225,224,220,0) 100%); filter:blur(38.5px); }
+.gfb .b3{ left:269.4px; top:908.8px; width:537.4px; height:282.2px; rotate:-5.4deg; opacity:.3;
+  background:linear-gradient(248.9deg, #FFEDAD 22%, rgba(225,224,220,0) 100%); filter:blur(38.5px); }
+.gfb::after{ content:''; position:absolute; inset:20px; border-radius:50%; pointer-events:none;
+  box-shadow:inset 0 -50px 65.5px -21px rgba(183,228,255,.7); }   /* 스크린 테두리(반지름 520)를 따라 */
+.gym.fb .gfb .b1{ animation:fbWobA 5.4s ease-in-out infinite; }
+.gym.fb .gfb .b3{ animation:fbWobB 4.1s ease-in-out infinite; }
 @keyframes fbWobA{
   0%, 100%{ translate:0 0; scale:1 1; }
   28%     { translate:-18px -8px; scale:1.07 .95; }
@@ -417,8 +420,6 @@ body.cd .gnum{ -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,.
   33%     { translate:16px 6px;  scale:.94 1.08; }
   61%     { translate:-12px -5px; scale:1.08 .96; }
 }
-.gym.fb .gfb::before{ animation:fbWobA 5.4s ease-in-out infinite; }
-.gym.fb .gfb::after { animation:fbWobB 4.1s ease-in-out infinite; }
 .gym.fb .gfb{ opacity:1; }
 
 /* 반응이 없으면(15s) 또는 사람이 보이지 않으면(4s) 문구가 아래로 빠지며 기본 화면으로 (병원과 같다) */
@@ -575,11 +576,18 @@ body.fill.leave .stage > *{ translate:0 110px; opacity:0;
     </div>
 
     <div class="gym" aria-hidden="true">
-      <div class="gfb"></div>
+      <div class="gfb"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
       <div class="gnum"><span class="pale"></span><span class="fillz"></span></div>
       <svg class="ggauge" viewBox="0 0 1080 1080" aria-hidden="true">
-        <path class="gtrk l"></path><path class="gtrk r"></path><path class="ptrk"></path>
-        <path class="gfil l"></path><path class="gfil r"></path><path class="pfil"></path>
+        <defs>
+          <linearGradient id="glg" gradientUnits="userSpaceOnUse"></linearGradient>
+          <linearGradient id="grg" gradientUnits="userSpaceOnUse"></linearGradient>
+          <linearGradient id="gpg" gradientUnits="userSpaceOnUse"></linearGradient>
+        </defs>
+        <path class="garc l" stroke="url(#glg)"></path>
+        <path class="garc r" stroke="url(#grg)"></path>
+        <path class="ptrk" stroke="url(#gpg)"></path>
+        <path class="pfil"></path>
         <circle class="pdot" r="13.3"></circle>
         <g class="gwt l"></g><g class="gwt r"></g>
       </svg>
@@ -631,7 +639,7 @@ const SCENES = [
     text:'Are you ready?', meta:'Neutral Grip · 10 Reps · 3 Sets' },
   { look:'full',   hold:0, mode:'countdown' },                                 // 시작 전 3 · 2 · 1
   { look:'full',   hold:0, mode:'reps', reps:10,                               // 1 → 10 (당길 때마다 숫자가 아래에서 위로 채워진다)
-    top:'Neutral Grip', next:'One Arm', set:'1', wl:'5.2', wr:'4.8', fl:.59, fr:.43, feedbackAt:5, feedback:'Pull Slowly..' },
+    top:'Neutral Grip', next:'One Arm', set:'1', wl:'5.2', wr:'4.8', fl:.51, fr:.33, feedbackAt:5, feedback:'Pull Slowly..' },
   { look:'bye',    hold:4200, delay:1000, hold1:true, rate:1.4,                // 마무리 인사 → 띠를 지우며 대기 상태로 (병원과 같은 속도·시각)
     text:'Nice set, Leo!' },
 ];
@@ -788,7 +796,7 @@ const numDotsFor = ch => NDOTS[ch] ??= (() => {
   return { dots, r: NUMDR, left: 0, top: 0, adv: NUMADV,
            w: (rows[0].length - 1) * NUMP + 2 * NUMDR, h: (rows.length - 1) * NUMP + 2 * NUMDR };
 })();
-const NUMH = 262.76, NUMW = 460;   // 피그마 숫자 높이 · 상자 폭(두 자리 '10' 이 433 이라 그보다 넓게 · 가운데 정렬)
+const NUMH = 257.239 * (520 / 540), NUMW = 443;   // 피그마 숫자 높이 · 상자 폭(두 자리 '10' 이 433 이라 그보다 넓게 · 가운데 정렬)
 const SVGNS = 'http://www.w3.org/2000/svg';
 const numPool = host => {
   const svg = document.createElementNS(SVGNS, 'svg');
@@ -833,7 +841,10 @@ const setChip = (el, name) => { el.querySelector('.xnm').textContent = name; };
    가운데 (540,540) · 반지름 487 · 굵기 16.5 · 둥근 끝
    왼손 무게 : 128°(아래) → 177°(위, 숫자 자리) · 오른손 : 52° → 3° · 전체 진행도 : 112° → 57°
    무게는 아래에서 위로 차고, 진행도는 왼쪽에서 오른쪽으로 찬다 (끝에 빛나는 점) */
-const GR = 487, GC = 540;
+/* 피그마 프레임은 스크린이 1080 꽉 차고 이 UI 는 1040(반지름 520)이라, 중심 기준 0.963 으로 줄여 옮긴다 */
+const DS = 520 / 540;
+const fig = v => 540 + (v - 540) * DS;
+const GR = 487 * DS, GC = 540;
 const GAUGE = { lw:[126,175], rw:[54,5], prog:[113.8,57] };   // 왼손 · 오른손 · 전체 진행도 (각도는 피그마 실측)
 const polar = a => [GC + GR * Math.cos(a * Math.PI / 180), GC + GR * Math.sin(a * Math.PI / 180)];
 const arcPath = (a0, a1) => {
@@ -843,11 +854,24 @@ const arcPath = (a0, a1) => {
 };
 const gauge = gym.querySelector('.ggauge');
 const gq = c => gauge.querySelector(c);
-gq('.gtrk.l').setAttribute('d', arcPath(...GAUGE.lw));
-gq('.gtrk.r').setAttribute('d', arcPath(...GAUGE.rw));
+// 호 하나에 그라디언트 : 아래 끝은 흰색, 채운 데까지 유지하고 위로 가며 옅어진다 (피그마 실측 : 전환 16%, 남은 쪽 알파 .145)
+const gradOn = (id, [a0, a1], f, from = 1, to = .128) => {
+  const g = gauge.querySelector('#' + id);
+  const [x0, y0] = polar(a0), [x1, y1] = polar(a1);
+  g.setAttribute('x1', x0); g.setAttribute('y1', y0);
+  g.setAttribute('x2', x1); g.setAttribute('y2', y1);
+  g.replaceChildren(...[[0, from], [f, from], [Math.min(1, f + .16), to], [1, to]].map(([o, a]) => {
+    const st = document.createElementNS(SVGNS, 'stop');
+    st.setAttribute('offset', o); st.setAttribute('stop-color', '#fff'); st.setAttribute('stop-opacity', a);
+    return st;
+  }));
+};
+gq('.garc.l').setAttribute('d', arcPath(...GAUGE.lw));
+gq('.garc.r').setAttribute('d', arcPath(...GAUGE.rw));
 gq('.ptrk').setAttribute('d', arcPath(...GAUGE.prog));
+gradOn('gpg', GAUGE.prog, 0, .09, .05);   // 진행도 트랙도 왼쪽이 조금 밝다
 // 무게 숫자(도트) : 피그마 실측 자리에 그대로 (잉크 높이 26 · 왼쪽 5.2 / 오른쪽 4.8)
-const WK = 26 / (6 * NUMP + 2 * NUMDR);   // 도트 한 칸 크기
+const WK = 26 * DS / (6 * NUMP + 2 * NUMDR);   // 도트 한 칸 크기 (피그마 잉크 높이 26)
 const dotNumAt = (g, str, centers, baseTop) => {
   const kids = [];
   [...str].forEach((ch, i) => {
@@ -866,11 +890,10 @@ const dotNumAt = (g, str, centers, baseTop) => {
   g.replaceChildren(...kids);
 };
 const setWeights = (l, r, fl, fr) => {
-  dotNumAt(gq('.gwt.l'), [...l].join(''), [51.67, 67.85, 85.91], 527);
-  dotNumAt(gq('.gwt.r'), [...r].join(''), [993.2, 1010.02, 1026.8], 527);
-  const f = (frac, [a0, a1]) => arcPath(a0, a0 + (a1 - a0) * frac);
-  gq('.gfil.l').setAttribute('d', f(fl, GAUGE.lw));
-  gq('.gfil.r').setAttribute('d', f(fr, GAUGE.rw));
+  dotNumAt(gq('.gwt.l'), l, [51.67, 67.85, 85.91].map(fig), fig(527));
+  dotNumAt(gq('.gwt.r'), r, [993.2, 1010.02, 1026.8].map(fig), fig(527));
+  gradOn('glg', GAUGE.lw, fl);
+  gradOn('grg', GAUGE.rw, fr);
 };
 const setProgress = p => {   // 0~1
   const [a0, a1] = GAUGE.prog, a = a0 + (a1 - a0) * p;
