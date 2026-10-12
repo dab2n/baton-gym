@@ -845,7 +845,7 @@ const setChip = (el, name) => { el.querySelector('.xnm').textContent = name; };
 const DS = 520 / 540;
 const fig = v => 540 + (v - 540) * DS;
 const GR = 487 * DS, GC = 540;
-const GAUGE = { lw:[126,175], rw:[54,5], prog:[113.8,57] };   // 왼손 · 오른손 · 전체 진행도 (각도는 피그마 실측)
+const GAUGE = { lw:[126,175], rw:[53,5], prog:[122,57] };   // 왼손 · 오른손 · 전체 진행도 (각도는 피그마 실측)
 const polar = a => [GC + GR * Math.cos(a * Math.PI / 180), GC + GR * Math.sin(a * Math.PI / 180)];
 const arcPath = (a0, a1) => {
   const [x0, y0] = polar(a0), [x1, y1] = polar(a1);
