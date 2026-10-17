@@ -19,25 +19,21 @@
 
 ## 장면
 
-피그마 `2436:392` (STAGE 01~05) 기준.
+피그마 `3971:702` (헬스장 ui · 일곱 프레임) 기준. 프레임 border 가 50px 이라 보이는 원의 반지름은 490.
 
-| # | 그래픽 | 화면 | 다음으로 |
+| # | look | 화면 | 다음으로 |
 |---|---|---|---|
-| 1 | idle | 검정 + 중앙 구슬이 배회·발광 | 얼굴 근접 |
-| 2 | fill | `Hello, shall we start your workout?` | 엄지척 |
-| 3 | search | 베젤 안쪽이 숨쉬듯 일렁임 (컨텍스트 수신) | 4.2s |
-| 4 | full | 기기 칩 등장 → `Welcome back, Somi.` | 4.3s |
-| 5 | full | `Today's context` · 어깨/상체 | 5.6s |
-| 6 | full | `Analyzing…` | 3.8s |
-| 7 | full | `Shoulder-friendly mode` · Level 03 · Light | 5.6s |
-| 8 | full | `Adjusting for you.` · Level 03 → 02 | 5.0s |
-| 9 | full | `You're all set.` | 4.2s |
-| 10 | full | `Ready?` · 10 REPS | 4.6s |
-| 11–14 | full | 카운트 `3/10` `4/10` `5/10` `10/10` + 한 줄 코칭 | 4.0~4.6s |
-| 15 | full | `Workout complete.` · 30 REPS · 3 SETS | 5.0s |
-| 16 | full | `Today's workout` 요약 | 5.6s |
-| 17 | full | `Workout saved.` | 5.0s |
-| 18 | full | `Goodbye, Somi.` | 유지 |
+| 0 | idle | 검정 + 중앙 구슬이 배회·발광 | 얼굴 근접 |
+| 1 | fill | `운동을 시작할까요?` | 엄지척 |
+| 2 | search | 별 모션 (맥락 전달) | 3.0s |
+| 3 | src | 맥락출처 로딩중 : 알약(185×184) 안에서 반짝임이 돈다 | 3.0s |
+| 4 | srcfull | 맥락출처 : 알약이 702 로 늘어나고 `NAV 001` 이 밀려 들어온다 | 2.8s |
+| 5 | talk1 | 맥락_대화1 : `Let's make today's workout right for you.` + 기록 칩 + `Find another Drop` | 6.4s |
+| 6 | ready | 알약이 `Neutral Grip` 칩으로 줄어 올라가고 배경이 어두워진다 · `Ready` | 3.4s |
+| 7 | reps | 1 → 10. 당길수록 도트 숫자가 아래에서 위로 찬다. 5회째에 아래 빛 + `Pull Slowly..` | 10회 |
+| 8 | bye | `Nice set, Leo!` → 대기 상태 | 4.2s |
+
+장면은 `index.html` 의 `SCENES` 배열 하나로만 관리한다.
 
 ## 크기
 
@@ -75,7 +71,7 @@ const GMIN = .35;   // 엄지척으로 인정할 최소 점수
 - 스크린 밖 여백 `#0B0F18`, 스크린은 검정에 위는 감청 아래 끝은 밝은 회색 띠.
   띠는 스크린과 같은 중심의 **동심원**으로 번지고(직선 경계가 가로줄로 보여서) 위/아래는 긴 마스크로만 나눈다.
   그 색은 `.rimlight` 가 18s 에 한 바퀴 돌아 가장자리를 따라 일렁인다
-- 베젤은 그리지 않고 카메라 노치만 매끈한 반구(`ellipse cx 540 cy -10 rx 86 ry 88`), 기본값은 목업 없는 실화면
+- 베젤은 50px 검정(보이는 원 반지름 490), 카메라 노치는 `ellipse cx 540 cy -0.5 rx 168 ry 119.5` 에 렌즈·센싱 라이트(따뜻한 #DEC1A9)
 - 글자는 흰색 (줄 박스 66% 까지 순백 → 아래 끝만 알파 .55), 자간 0.03em, 강조어는 흰색 + `#FEFFF9` 글리밍 한 겹
   (글리밍 번짐은 `blur` 를 em 단위로 : 헬스장 글자는 76px 이라 px 고정이면 번짐이 너무 작다)
 - 구슬은 어두운 화면에 맞춰 : `fill` 은 opacity .045 + grayscale, `search` 는 .06, 문구 장면(`full`)에선 감춘다.
